@@ -1,10 +1,11 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { MenuIcon, SearchIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, ReactNode, useState } from 'react';
+import Footer from './Footer';
 import Sidebar from './Sidebar';
 
-const Layouts = () => {
+const Layouts = (props: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
   const changeDrower = () => {
     setOpen((prevState) => !prevState);
@@ -12,8 +13,8 @@ const Layouts = () => {
   };
 
   return (
-    <>
-      <div className="fixed w-full h-16 bg-blue-300 z-10">
+    <div className="min-h-screen relative top-0">
+      <div className="fixed w-full h-16 bg-blue-300 z-10 top-0">
         <nav className="flex w-full h-full container mx-auto items-center">
           <div className="text-left">
             <button onClick={changeDrower}>
@@ -80,7 +81,9 @@ const Layouts = () => {
           </div>
         </Dialog>
       </Transition.Root>
-    </>
+      <main className="py-16">{props.children}</main>
+      <Footer />
+    </div>
   );
 };
 export default Layouts;
