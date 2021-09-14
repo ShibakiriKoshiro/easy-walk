@@ -13,8 +13,9 @@
     "@headlessui/react": "^0.0.0-d60d2a5",
     "@heroicons/react": "^1.0.3",
     "next": "11.0.1",
-    "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react": "^17.0.2",
+    "react-dom": "17.0.2",
+    "react-hook-form": "^7.15.2"
   },
   "devDependencies": {
     "@types/react": "^17.0.15",
@@ -33,6 +34,8 @@
     "*.{js,css,md,tsx,ts}": [
       "organize-imports-cli",
       "prettier --write"
-    ]
+    ],
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
   }
 }

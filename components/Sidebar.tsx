@@ -110,7 +110,7 @@ const Sidebar = () => {
   return (
     <div className="py-6">
       {sideNavList.map((item) => (
-        <>
+        <div key={item.label}>
           <>
             <Link key={item.label} href={item.href}>
               <a className="block py-3 px-4 hover:bg-gray-100">
@@ -124,7 +124,7 @@ const Sidebar = () => {
           </>
           {item.categories &&
             item.categories.map((category) => (
-              <>
+              <div key={category.label}>
                 <Link key={category.label} href={category.href}>
                   <a className="block py-3 px-4 hover:bg-gray-100">
                     <div className="flex items-center">
@@ -133,9 +133,9 @@ const Sidebar = () => {
                   </a>
                 </Link>
                 {category.element}
-              </>
+              </div>
             ))}
-        </>
+        </div>
       ))}
     </div>
   );
