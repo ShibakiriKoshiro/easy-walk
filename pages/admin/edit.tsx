@@ -1,4 +1,6 @@
 import { CameraIcon } from '@heroicons/react/solid';
+import axios from 'axios';
+import parse from 'html-react-parser';
 import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -11,7 +13,8 @@ const QuillNoSSRWrapper = dynamic(import('react-quill'), {
 type Inputs = {
   title: string;
   description: string;
-  topImage: File;
+  category: string;
+  status: string;
 };
 
 const modules = {
@@ -54,6 +57,19 @@ const formats = [
   'video',
 ];
 
+function onSubmit(value) {
+  console.log(value);
+  let data = { content: value };
+  axios
+    .post('/api/sendpost', data)
+    .then((response) => {
+      console.log(response);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
 export default function Home() {
   const {
     register,
@@ -61,7 +77,9 @@ export default function Home() {
     watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit = (data) => console.log(data);
+  const onSubmit = (data) => {
+    console.log(data);
+  };
 
   const [title, setTitle] = useState('');
   const handleTitle = (event) => {
@@ -71,6 +89,8 @@ export default function Home() {
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
+
+  const [value, setValue] = useState('');
 
   return (
     <>
@@ -90,6 +110,7 @@ export default function Home() {
                 name="country"
                 autoComplete="country"
                 className="text-lg font-bold ml-auto mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                {...register('status', { required: true })}
               >
                 <option>公開</option>
                 <option>非公開</option>
@@ -99,10 +120,9 @@ export default function Home() {
             <input
               placeholder="タイトル"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-              {...register('title', { required: true })}
               onChange={(event) => handleTitle(event)}
               type={'text'}
-              value={title}
+              {...register('title', { required: true })}
             />
             <p className="text-right">{title.length} /32文字</p>
             <textarea
@@ -119,12 +139,7 @@ export default function Home() {
                 htmlFor="avater"
                 className="h-full mt-auto -ml-6 cursor-pointer"
               >
-                <input
-                  id="avater"
-                  type="file"
-                  className="hidden"
-                  {...register('topImage', { required: true })}
-                />
+                <input id="avater" type="file" className="hidden" />
                 <CameraIcon
                   className="h-10 w-10"
                   fill="none"
@@ -144,24 +159,28 @@ export default function Home() {
                 name="country"
                 autoComplete="country"
                 className="text-lg font-bold mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                {...register('category', { required: true })}
               >
                 <option>観光</option>
                 <option>体験</option>
                 <option>特産品</option>
               </select>
             </div>
-            <div className="editorContainer mt-12 ">
+            <div className="mt-6">
               <QuillNoSSRWrapper
                 modules={modules}
+                placeholder="compose here"
+                value={value}
+                onChange={setValue}
                 formats={formats}
                 theme="snow"
               />
+              <button onClick={(e) => onSubmit(value)}> Send post</button>
+              <p>{value}</p>
+              {parse(value)}
             </div>
             <div className="block lg:flex mt-6">
-              <button
-                className="mr-auto mt-3 block px-8 py-2 bg-red-600 hover:bg-pink-600 shadow rounded text-white font-bold"
-                type="submit"
-              >
+              <button className="mr-auto mt-3 block px-8 py-2 bg-red-600 hover:bg-pink-600 shadow rounded text-white font-bold">
                 削除
               </button>
               <button
