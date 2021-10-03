@@ -1,11 +1,10 @@
 import React from 'react';
-import Heading from '../components/Heading';
 import StampCard from '../components/StampCard';
 
 const Stamp = () => {
   return (
     <div className="">
-      <Heading />
+      {/* <Heading /> */}
       <div className="container">
         <p className="font-bold text-lg">お寺</p>
         <div className="mt-6 grid grid-cols-6 gap-4">

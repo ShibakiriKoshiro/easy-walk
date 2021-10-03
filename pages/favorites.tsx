@@ -5,7 +5,7 @@ import Heading from '../components/Heading';
 const MyList = () => {
   return (
     <div>
-      <Heading />
+      <Heading heading="お気に入りの記事" heroIconName="SearchIcon" />
       <div className="w-full">
         <div className="">
           <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 container">
