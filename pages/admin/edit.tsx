@@ -1,8 +1,7 @@
 import { CameraIcon } from '@heroicons/react/solid';
-import axios from 'axios';
 import parse from 'html-react-parser';
 import dynamic from 'next/dynamic';
-import React, { useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Heading from '../../components/Heading';
 
@@ -14,7 +13,8 @@ type Inputs = {
   title: string;
   description: string;
   category: string;
-  status: string;
+  status: 'public' | 'private';
+  value: string;
 };
 
 const modules = {
@@ -57,19 +57,6 @@ const formats = [
   'video',
 ];
 
-function onSubmit(value) {
-  console.log(value);
-  let data = { content: value };
-  axios
-    .post('/api/sendpost', data)
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-}
-
 export default function Home() {
   const {
     register,
@@ -77,12 +64,14 @@ export default function Home() {
     watch,
     formState: { errors },
   } = useForm<Inputs>();
+
   const onSubmit = (data) => {
     console.log(data);
   };
 
   const [title, setTitle] = useState('');
   const handleTitle = (event) => {
+    console.log(title);
     setTitle(event.target.value);
   };
   const [description, setDescription] = useState('');
@@ -91,6 +80,17 @@ export default function Home() {
   };
 
   const [value, setValue] = useState('');
+
+  const categories = ['観光', '特産品', '体験'];
+
+  const onFileChange = (e: FormEvent<HTMLLabelElement>) => {
+    const target: any = e.target;
+    const files = target.files;
+
+    if (files.length) {
+      console.log(files[0]);
+    }
+  };
 
   return (
     <>
@@ -112,17 +112,17 @@ export default function Home() {
                 className="text-lg font-bold ml-auto mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 {...register('status', { required: true })}
               >
-                <option>公開</option>
-                <option>非公開</option>
-                <option>下書き</option>
+                <option value="public">公開</option>
+                <option value="private">非公開</option>
               </select>
             </div>
             <input
               placeholder="タイトル"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
+              {...register('title', { required: true })}
               onChange={(event) => handleTitle(event)}
               type={'text'}
-              {...register('title', { required: true })}
+              value={title}
             />
             <p className="text-right">{title.length} /32文字</p>
             <textarea
@@ -138,6 +138,9 @@ export default function Home() {
               <label
                 htmlFor="avater"
                 className="h-full mt-auto -ml-6 cursor-pointer"
+                onChange={(e) => {
+                  return onFileChange(e);
+                }}
               >
                 <input id="avater" type="file" className="hidden" />
                 <CameraIcon
@@ -161,9 +164,9 @@ export default function Home() {
                 className="text-lg font-bold mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 {...register('category', { required: true })}
               >
-                <option>観光</option>
-                <option>体験</option>
-                <option>特産品</option>
+                {categories.map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
               </select>
             </div>
             <div className="mt-6">
