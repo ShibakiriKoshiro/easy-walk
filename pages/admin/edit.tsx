@@ -3,7 +3,6 @@ import parse from 'html-react-parser';
 import dynamic from 'next/dynamic';
 import React, { FormEvent, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Heading from '../../components/Heading';
 
 const QuillNoSSRWrapper = dynamic(import('react-quill'), {
   ssr: false,
@@ -94,7 +93,7 @@ export default function Home() {
 
   return (
     <>
-      <Heading />
+      {/* <Heading /> */}
       <div className="container pt-8 pb-16">
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>

@@ -1,6 +1,5 @@
 import React from 'react';
 import ArticleCard from '../components/ArticleCard';
-import Heading from '../components/Heading';
 import Article from '../types/article-card';
 
 type Props = {
@@ -10,7 +9,7 @@ type Props = {
 const MyList = ({ articles }: Props) => {
   return (
     <div>
-      <Heading />
+      {/* <Heading /> */}
       <div className="w-full">
         <div className="">
           <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4 container">
