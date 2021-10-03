@@ -33,8 +33,12 @@ const About = () => {
       </div>
       <div className="mt-6">
         <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
-          <ArticleCard title="タイトル" />
-          <ArticleCard title="タイトルです。タイトルです。タイトルです。タイトルです。" />
+          <ArticleCard
+            title="タイトル"
+            href="/article/1"
+            user="ユーザー名"
+            date="2021-10-10"
+          />
         </div>
       </div>
     </div>
