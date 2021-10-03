@@ -2,16 +2,19 @@ import { LockClosedIcon } from '@heroicons/react/solid';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
+import Date from './Date';
 
-type ArticleCardProps = {
+type Props = {
   title: string;
-  href?: string;
+  href: string;
+  user: string;
+  date: string;
 };
 
-const ArticleCard: React.VFC<ArticleCardProps> = ({ title, href }) => {
+const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
   return (
     <div className="flex flex-col">
-      <Link href="/article">
+      <Link href={href}>
         <a className="h-full flex flex-col">
           <div className="shadow rounded-lg flex flex-col flex-1">
             <div className="h-40 relative">
@@ -39,12 +42,14 @@ const ArticleCard: React.VFC<ArticleCardProps> = ({ title, href }) => {
                         className="rounded-full"
                       />
                     </div>
-                    <p className="text-base pl-2">ユーザー名</p>
+                    <p className="text-base pl-2">{user}</p>
                   </div>
                 </a>
               </Link>
               <div className="flex items-center">
-                <p className="text-base text-gray-400">2021/8/15</p>
+                <p className="text-base text-gray-400">
+                  <Date dateString={date} />
+                </p>
                 <LockClosedIcon
                   className="h-6 w-6 ml-auto"
                   fill="none"
