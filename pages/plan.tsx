@@ -1,11 +1,15 @@
-import { NewspaperIcon } from '@heroicons/react/solid';
+import { BeakerIcon, NewspaperIcon } from '@heroicons/react/solid';
 import React from 'react';
+import Heading from '../components/Heading';
 import TextLink from '../components/TextLink';
 
 const Plan = () => {
   return (
     <div>
-      {/* <Heading /> */}
+      <Heading>
+        <BeakerIcon className="h-6 w-6 mr-6" />
+        <p className="text-xl font-bold">見出しです！</p>
+      </Heading>
       <div className="container ">
         <p className="text-lg mt-12">月額課金</p>
         <div className="sm:grid sm:grid-cols-2 gap-4 mt-3 mb-2">
