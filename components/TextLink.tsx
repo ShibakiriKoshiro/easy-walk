@@ -6,7 +6,7 @@ const TextLink = ({ children }) => {
     .join(' ');
   return (
     <a className={classSet} href="#">
-      {children}
+      {}
     </a>
   );
 };

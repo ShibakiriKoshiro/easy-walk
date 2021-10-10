@@ -1,10 +1,14 @@
-import { PencilIcon } from '@heroicons/react/solid';
+import { BeakerIcon, PencilIcon } from '@heroicons/react/solid';
 import React from 'react';
+import Heading from '../../components/Heading';
 
 const Management = () => {
   return (
     <div>
-      {/* <Heading /> */}
+      <Heading>
+        <BeakerIcon className="h-6 w-6 mr-6" />
+        <p className="text-xl font-bold">見出しです！</p>
+      </Heading>
       <div className="container">
         <div className="border-b border-blue-gray-300">
           <div className="flex">
