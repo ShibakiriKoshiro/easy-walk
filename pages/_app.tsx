@@ -1,14 +1,14 @@
 import React from 'react';
 import 'react-quill/dist/quill.snow.css';
 import 'tailwindcss/tailwind.css';
-import Layouts from '../components/Layouts';
+import Layout from '../components/Layout';
 
 const MyApp = ({ Component, pageProps }) => {
   return (
     <>
-      <Layouts>
+      <Layout>
         <Component {...pageProps} />
-      </Layouts>
+      </Layout>
     </>
   );
 };
