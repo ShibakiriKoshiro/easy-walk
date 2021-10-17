@@ -4,7 +4,7 @@ import React from 'react';
 
 const Hero = () => {
   return (
-    <div>
+    <div className="-mt-16">
       <div className="relative top-0 lg:h-screen flex items-center">
         <div className="bg-hero-pattern h-screen opacity-80">
           <Image

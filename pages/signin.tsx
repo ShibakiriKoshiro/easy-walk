@@ -1,14 +1,23 @@
-import React from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
-import TextLink from '../components/TextLink';
+import { auth } from '../libs/firebase';
 
 type Inputs = {
-  mailAddress: string;
+  email: string;
   password: string;
 };
 
-const Signin = () => {
+const Signin: FC = () => {
+  const router = useRouter();
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      user && router.push('/');
+    });
+  }, []);
   const {
     register,
     handleSubmit,
@@ -17,15 +26,35 @@ const Signin = () => {
   } = useForm<Inputs>();
   const onSubmit = (data) => console.log(data);
 
+  // const [email, setEmail] = useState<string>('');
+  // const [password, setPassword] = useState<string>('');
+
+  const logIn = async (data, e) => {
+    console.log(data);
+    const email = data.email;
+    const password = data.password;
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        // ...
+        router.push('/');
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  };
+
   return (
     <div className="container w-full">
       <div className="w-full">
         <p className="text-center pt-8 font-bold text-lg">サインイン</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(logIn)}>
           <input
             placeholder="メールアドレス"
             className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
-            {...register('mailAddress', { required: true })}
+            {...register('email', { required: true })}
           />
           <input
             placeholder="パスワード"
@@ -53,7 +82,9 @@ const Signin = () => {
         <Button theme="facebook">Facebook</Button>
         <Button theme="google">Google</Button>
         <Button theme="twitter">Twitter</Button>
-        <TextLink>登録はこちら</TextLink>
+        <Link href="/signup">
+          <a className="text-blue-600 font-bold">登録はこちら</a>
+        </Link>
       </div>
     </div>
   );

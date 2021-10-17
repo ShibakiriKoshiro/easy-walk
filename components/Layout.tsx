@@ -1,15 +1,35 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { MenuIcon, SearchIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import React, { Fragment, ReactNode, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
+import { auth } from '../libs/firebase';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
 
-const Layouts = (props: { children: ReactNode }) => {
+const Layouts: FC = (props: { children: ReactNode }) => {
+  const router = useRouter();
+  const [currentUser, setCurrentUser] = useState<null | object>(null);
+
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      setCurrentUser(user);
+    });
+  }, []);
+
   const [open, setOpen] = useState(false);
   const changeDrower = () => {
     setOpen((prevState) => !prevState);
     console.log(open);
+  };
+
+  const logOut = async () => {
+    try {
+      await auth.signOut();
+      router.push('/signin');
+    } catch (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -29,13 +49,22 @@ const Layouts = (props: { children: ReactNode }) => {
             </Link>
           </div>
           <div className="ml-6">
-            <Link href="/login">
-              <a>
-                <div className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white">
-                  <p>ログイン</p>
-                </div>
-              </a>
-            </Link>
+            {currentUser ? (
+              <button
+                onClick={logOut}
+                className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white outline-none"
+              >
+                ログアウト
+              </button>
+            ) : (
+              <Link href="/signin">
+                <a>
+                  <div className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white">
+                    <p>ログイン</p>
+                  </div>
+                </a>
+              </Link>
+            )}
           </div>
         </nav>
       </div>

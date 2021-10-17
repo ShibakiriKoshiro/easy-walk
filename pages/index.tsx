@@ -2,7 +2,7 @@ import { onAuthStateChanged, signInAnonymously, User } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
-import { auth } from '../utils/firebase';
+import { auth } from '../libs/firebase';
 
 const Home = () => {
   const [user, setUser] = useState<User | null>();
