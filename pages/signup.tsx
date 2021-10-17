@@ -1,15 +1,25 @@
-import React from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/router';
+import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
 import TextLink from '../components/TextLink';
+import { auth } from '../libs/firebase';
 
 type Inputs = {
   name: string;
-  mailAddress: string;
+  email: string;
   password: string;
 };
 
-const Signup = () => {
+const Signup: FC = () => {
+  const router = useRouter();
+  useEffect(() => {
+    auth.onAuthStateChanged((user) => {
+      user && router.push('/');
+    });
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -18,11 +28,28 @@ const Signup = () => {
   } = useForm<Inputs>();
   const onSubmit = (data) => console.log(data);
 
+  const createUser = async (data, e) => {
+    const email = data.email;
+    const password = data.password;
+    e.preventDefault();
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        // ...
+        router.push('/signin');
+      })
+      .catch((err) => {
+        alert(err.message);
+        // ..
+      });
+  };
+
   return (
     <div className="container w-full">
       <div className="w-full">
         <p className="text-center pt-8 font-bold text-lg">サインアップ</p>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(createUser)}>
           <input
             placeholder="ユーザ名"
             className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
@@ -32,7 +59,7 @@ const Signup = () => {
           <input
             placeholder="メールアドレス"
             className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
-            {...register('mailAddress', { required: true })}
+            {...register('email', { required: true })}
           />
           <input
             placeholder="パスワード"
