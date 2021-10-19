@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import Features from '../components/Features';
 import Hero from '../components/Hero';
 import { auth } from '../libs/firebase';
+import { useAuth } from '../libs/userContext';
 
 const Home = () => {
-  const [user, setUser] = useState<User | null>();
+  const [cuser, setCUser] = useState<User | null>();
+  const { user } = useAuth();
+  console.log(user, 'user');
 
   const signIn = () => {
     signInAnonymously(auth).then(() => {
@@ -19,7 +22,7 @@ const Home = () => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
-      setUser(user);
+      setCUser(user);
     });
   }, []);
 
@@ -27,8 +30,8 @@ const Home = () => {
     <>
       <Hero />
       <Features />
-      {user && <p>{user.uid}さんがログイン中です。</p>}
-      {user ? (
+      {cuser && <p>{cuser.uid}さんがログイン中です。</p>}
+      {cuser ? (
         <button onClick={signOut}>ログアウト</button>
       ) : (
         <button onClick={signIn}>ログイン</button>
