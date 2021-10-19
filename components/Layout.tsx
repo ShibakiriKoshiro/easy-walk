@@ -4,16 +4,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
 import { auth } from '../libs/firebase';
+import { useAuth } from '../libs/userContext';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
 
 const Layouts: FC = (props: { children: ReactNode }) => {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<null | object>(null);
 
+  const { user } = useAuth();
+  const [currentUser, setCurrentUser] = useState<null | object>(null);
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      setCurrentUser(user);
+    auth.onAuthStateChanged(() => {
+      user && setCurrentUser(user);
     });
   }, []);
 
@@ -49,7 +51,7 @@ const Layouts: FC = (props: { children: ReactNode }) => {
             </Link>
           </div>
           <div className="ml-6">
-            {currentUser ? (
+            {user ? (
               <button
                 onClick={logOut}
                 className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white outline-none"
