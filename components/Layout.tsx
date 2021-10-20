@@ -2,27 +2,19 @@ import { Dialog, Transition } from '@headlessui/react';
 import { MenuIcon, SearchIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
+import React, { FC, Fragment, ReactNode, useState } from 'react';
 import { auth } from '../libs/firebase';
 import { useAuth } from '../libs/userContext';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
 
 const Layouts: FC = (props: { children: ReactNode }) => {
-  const router = useRouter();
-
   const { user } = useAuth();
-  const [currentUser, setCurrentUser] = useState<null | object>(null);
-  useEffect(() => {
-    auth.onAuthStateChanged(() => {
-      user && setCurrentUser(user);
-    });
-  }, []);
+  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const changeDrower = () => {
     setOpen((prevState) => !prevState);
-    console.log(open);
   };
 
   const logOut = async () => {
@@ -67,6 +59,12 @@ const Layouts: FC = (props: { children: ReactNode }) => {
                 </a>
               </Link>
             )}
+            <button
+              onClick={logOut}
+              className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white outline-none"
+            >
+              ログアウト
+            </button>
           </div>
         </nav>
       </div>

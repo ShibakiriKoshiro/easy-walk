@@ -1,6 +1,6 @@
 export type User = {
   uid: string;
-  customerId: string;
+  name: string;
+  email: string;
   createdAt: number;
-  premium: boolean;
 };
