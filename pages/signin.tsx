@@ -5,6 +5,7 @@ import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
 import { auth } from '../libs/firebase';
+import { useAuth } from '../libs/userContext';
 
 type Inputs = {
   email: string;
@@ -13,6 +14,7 @@ type Inputs = {
 
 const Signin: FC = () => {
   const router = useRouter();
+  const { user } = useAuth();
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       user && router.push('/');

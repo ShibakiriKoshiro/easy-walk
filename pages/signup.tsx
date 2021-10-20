@@ -1,10 +1,11 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { addDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
 import TextLink from '../components/TextLink';
-import { auth } from '../libs/firebase';
+import { auth, db } from '../libs/firebase';
 
 type Inputs = {
   name: string;
@@ -33,7 +34,19 @@ const Signup: FC = () => {
     const password = data.password;
     e.preventDefault();
     createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
+        try {
+          const docRef = await addDoc(collection(db, 'users'), {
+            uid: auth.currentUser.uid,
+            name: data.name,
+            email: email,
+            createdAt: auth.currentUser.metadata.creationTime,
+          });
+          console.log('Document written with ID: ', docRef.id);
+        } catch (e) {
+          console.error('Error adding document: ', e);
+        }
+
         // Signed in
         const user = userCredential.user;
         // ...
