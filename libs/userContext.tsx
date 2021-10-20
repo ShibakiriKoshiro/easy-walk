@@ -1,6 +1,8 @@
-import { User } from '@firebase/auth';
+import { onAuthStateChanged } from '@firebase/auth';
+import { doc, getDoc } from '@firebase/firestore';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from './firebase';
+import { User } from '../types/User';
+import { auth, db } from './firebase';
 
 // 箱を定義
 const AuthContext = createContext<{
@@ -9,13 +11,18 @@ const AuthContext = createContext<{
   user: null,
 });
 
-export const AuthProvider = ({ children }: any) => {
+export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const watch = auth.onAuthStateChanged((user) => {
-      setUser(user);
+    // ログインユーザー監視
+    const watch = onAuthStateChanged(auth, async (user) => {
+      console.log(user);
+      const querySnapshot = await getDoc(doc(db, `users/${user?.uid}`));
+      const fbUser = querySnapshot.data() as User;
+      setUser(fbUser);
     });
+
     return () => {
       watch();
     };

@@ -13,33 +13,32 @@ type Inputs = {
 };
 
 const Signin: FC = () => {
-  const router = useRouter();
+  // 箱の中身を取り出している
   const { user } = useAuth();
+  const router = useRouter();
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       user && router.push('/');
     });
   }, []);
+
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit = (data) => console.log(data);
 
   // const [email, setEmail] = useState<string>('');
   // const [password, setPassword] = useState<string>('');
 
   const logIn = async (data, e) => {
-    console.log(data);
     const email = data.email;
     const password = data.password;
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // Signed in
-        const user = userCredential.user;
         // ...
         router.push('/');
       })
