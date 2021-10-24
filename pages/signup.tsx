@@ -1,12 +1,11 @@
+import { doc, setDoc } from '@firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
 import TextLink from '../components/TextLink';
 import { auth, db } from '../libs/firebase';
-import { doc, getDoc, setDoc } from '@firebase/firestore';
 
 type Inputs = {
   name: string;

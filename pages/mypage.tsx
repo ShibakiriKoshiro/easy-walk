@@ -2,7 +2,6 @@ import { CameraIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import Heading from '../components/Heading';
 
 type Inputs = {
   userName: string;
