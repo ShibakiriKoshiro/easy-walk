@@ -2,7 +2,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import { MenuIcon, SearchIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { FC, Fragment, ReactNode, useState } from 'react';
+import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
 import { auth } from '../libs/firebase';
 import { useAuth } from '../libs/userContext';
 import Footer from './Footer';
@@ -25,6 +25,9 @@ const Layouts: FC = (props: { children: ReactNode }) => {
       alert(error.message);
     }
   };
+  useEffect(() => {
+    console.log(user, 'aa');
+  }, []);
 
   return (
     <div className="min-h-screen relative top-0">
@@ -59,12 +62,6 @@ const Layouts: FC = (props: { children: ReactNode }) => {
                 </a>
               </Link>
             )}
-            <button
-              onClick={logOut}
-              className="bg-blue-600 py-1 px-2 shadow rounded-sm text-white outline-none"
-            >
-              ログアウト
-            </button>
           </div>
         </nav>
       </div>

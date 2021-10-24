@@ -21,7 +21,6 @@ const Mypage = () => {
 
   return (
     <div className="pt-8 pb-16">
-      <Heading />
       <div className="container">
         <p className="font-bold">プロフィール</p>
         <div>

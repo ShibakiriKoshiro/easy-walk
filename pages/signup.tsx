@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import Button from '../components/Button';
 import TextLink from '../components/TextLink';
 import { auth, db } from '../libs/firebase';
+import { doc, getDoc, setDoc } from '@firebase/firestore';
 
 type Inputs = {
   name: string;
@@ -36,13 +37,12 @@ const Signup: FC = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         try {
-          const docRef = await addDoc(collection(db, 'users'), {
+          const docRef = await setDoc(doc(db, 'users', auth.currentUser.uid), {
             uid: auth.currentUser.uid,
             name: data.name,
             email: email,
             createdAt: auth.currentUser.metadata.creationTime,
           });
-          console.log('Document written with ID: ', docRef.id);
         } catch (e) {
           console.error('Error adding document: ', e);
         }

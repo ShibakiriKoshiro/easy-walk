@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // ログインユーザー監視
     const watch = onAuthStateChanged(auth, async (user) => {
-      console.log(user);
       const querySnapshot = await getDoc(doc(db, `users/${user?.uid}`));
       const fbUser = querySnapshot.data() as User;
       setUser(fbUser);
