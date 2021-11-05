@@ -19,8 +19,6 @@ type Inputs = {
 
 const Mypage = () => {
   const { user } = useAuth();
-  console.log(user, 'useEffectより前に取れていない。');
-  const [isOpen, setIsOpen] = useState(true);
   const {
     register,
     handleSubmit,
@@ -30,8 +28,7 @@ const Mypage = () => {
   const onSubmit = (data) => console.log(data);
 
   useEffect(() => {
-    console.log('useEffect');
-    const userDoc = doc(db, 'users/FnBNsBdPztUlfSz0Dq5UBK3H5XD3');
+    const userDoc = doc(db, `users/FnBNsBdPztUlfSz0Dq5UBK3H5XD3`);
 
     getDoc(userDoc).then((result) => {
       const userData = result.data();
@@ -174,7 +171,6 @@ const Mypage = () => {
                 クロップする
               </button>
             </Modal>
-
             <div className="mt-10">
               <button
                 className="px-4 py-3 shadow rounded bg-gray-700 text-white"
@@ -195,10 +191,10 @@ const Mypage = () => {
                   </svg>
                 </span>
                 <label
-                  htmlFor="avater"
+                  htmlFor="avatar"
                   className="h-full mt-auto -ml-6 cursor-pointer"
                 >
-                  <input id="avater" type="file" className="hidden" />
+                  <input id="avatar" type="file" className="hidden" />
                   <CameraIcon
                     className="h-10 w-10"
                     fill="none"
