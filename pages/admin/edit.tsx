@@ -1,14 +1,17 @@
+/* eslint-disable @next/next/no-img-element */
 import { BeakerIcon, CameraIcon } from '@heroicons/react/solid';
+import loadImage from 'blueimp-load-image';
+import { ref, uploadBytes } from 'firebase/storage';
 import parse from 'html-react-parser';
 import dynamic from 'next/dynamic';
 import React, { FormEvent, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Heading from '../../components/Heading';
+import { storage } from '../../libs/firebase';
 
 const QuillNoSSRWrapper = dynamic(import('react-quill'), {
   ssr: false,
 });
-
 type Inputs = {
   title: string;
   description: string;
@@ -91,6 +94,26 @@ export default function Home() {
       console.log(files[0]);
     }
   };
+  const [preview, setPreview] = useState('/img/no_image.png');
+
+  const handleChangeFile = async (e) => {
+    new Promise(async (resolve) => {
+      const { files } = e.target;
+      setPreview(window.URL.createObjectURL(files[0]));
+      const canvas = await loadImage(files[0], {
+        maxWidth: 1200,
+        canvas: true,
+      });
+
+      canvas.image.toBlob((blob) => {
+        const imageRef = ref(storage, 'images/sample');
+
+        uploadBytes(imageRef, blob).then(() => {
+          resolve(blob);
+        });
+      }, files[0].type);
+    });
+  };
 
   return (
     <>
@@ -137,17 +160,28 @@ export default function Home() {
             />
             <p className="text-right">{description.length} /120文字</p>
             <div className="mt-6 flex">
-              <div className="bg-yellow-300 rounded inline-block h-24 w-32 overflow-hidden"></div>
+              <div className="h-32 w-32">
+                <img
+                  src={preview}
+                  alt="preview"
+                  className="object-contain w-full h-full"
+                />
+              </div>
               <label
+                className="-ml-4 mt-auto"
                 htmlFor="avater"
-                className="h-full mt-auto -ml-6 cursor-pointer"
                 onChange={(e) => {
                   return onFileChange(e);
                 }}
               >
-                <input id="avater" type="file" className="hidden" />
+                <input
+                  id="avater"
+                  type="file"
+                  className="hidden"
+                  onChange={handleChangeFile}
+                />
                 <CameraIcon
-                  className="h-10 w-10"
+                  className="h-10 w-10 cursor-pointer"
                   fill="none"
                   stroke="currentColor"
                 />
