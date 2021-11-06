@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getFunctions } from 'firebase/functions';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   // dev環境Firebase
@@ -27,11 +28,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig.dev);
 
 // auth
-const auth = getAuth();
+const auth = getAuth(app);
 export { auth };
 
 // firestore
-export const db = getFirestore();
+export const db = getFirestore(app);
 
 // functions リージョンは大阪
 export const functions = getFunctions(app, 'asia-northeast2');
+
+/**
+ * storage he no shorthand
+ */
+export const storage = getStorage(app);

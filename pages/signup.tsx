@@ -1,5 +1,5 @@
+import { doc, setDoc } from '@firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import React, { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -36,13 +36,12 @@ const Signup: FC = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         try {
-          const docRef = await addDoc(collection(db, 'users'), {
+          const docRef = await setDoc(doc(db, 'users', auth.currentUser.uid), {
             uid: auth.currentUser.uid,
             name: data.name,
             email: email,
             createdAt: auth.currentUser.metadata.creationTime,
           });
-          console.log('Document written with ID: ', docRef.id);
         } catch (e) {
           console.error('Error adding document: ', e);
         }

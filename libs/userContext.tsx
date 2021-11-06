@@ -13,11 +13,9 @@ const AuthContext = createContext<{
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
   useEffect(() => {
     // ログインユーザー監視
     const watch = onAuthStateChanged(auth, async (user) => {
-      console.log(user);
       const querySnapshot = await getDoc(doc(db, `users/${user?.uid}`));
       const fbUser = querySnapshot.data() as User;
       setUser(fbUser);
