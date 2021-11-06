@@ -10,6 +10,7 @@ import { useForm } from 'react-hook-form';
 import Modal from 'react-modal';
 import { db, storage } from '../libs/firebase';
 import { useAuth } from '../libs/userContext';
+import styles from '../styles/Modal.module.css';
 
 type Inputs = {
   userName: string;
@@ -74,7 +75,7 @@ const Mypage = () => {
       const wrapper = new Cropper(image, {
         aspectRatio: 1 / 1,
         cropBoxResizable: false,
-        cropBoxMovable: false,
+        // cropBoxMovable: false,
         dragMode: 'move',
         viewMode: 3,
       });
@@ -166,34 +167,38 @@ const Mypage = () => {
               onAfterOpen={initCropper}
               onRequestClose={() => setTargetFile(null)}
               contentLabel="Example Modal"
+              className={styles.modal}
+              overlayClassName={styles.overlay}
             >
-              <h2 className="font-bold text-2xl mb-6 mt-16">クロップ</h2>
+              <h2 className="font-bold text-2xl mb-6">画像を切り取る</h2>
 
-              <div className="max-w-sm pb-4 border-b mb-4">
+              <div className="max-w-sm h-60 pb-4 border-b mb-4">
                 <img id="image" className="block w-full" alt="" />
               </div>
 
-              <button
-                className="px-4 py-3 shadow rounded bg-gray-700 text-white"
-                type="submit"
-                onClick={() => {
-                  // プレビューステートにクロッピング結果を格納
-                  const croppedImage = cropper
-                    ?.getCroppedCanvas({
-                      width: 300, // リサイズ
-                      height: 300, // リサイズ
-                    })
-                    .toDataURL('image/jpeg');
+              <div className="text-right w-full">
+                <button
+                  className="px-4 py-3 shadow rounded bg-gray-700 text-white"
+                  type="submit"
+                  onClick={() => {
+                    // プレビューステートにクロッピング結果を格納
+                    const croppedImage = cropper
+                      ?.getCroppedCanvas({
+                        width: 256, // リサイズ
+                        height: 256, // リサイズ
+                      })
+                      .toDataURL('image/jpeg');
 
-                  // プレビューステートにセット
-                  setPreview(croppedImage);
-                  // ダイヤログを閉じるためにクロップターゲットを空にする
-                  setTargetFile(null);
-                  SetUploadImage(true);
-                }}
-              >
-                クロップする
-              </button>
+                    // プレビューステートにセット
+                    setPreview(croppedImage);
+                    // ダイヤログを閉じるためにクロップターゲットを空にする
+                    setTargetFile(null);
+                    SetUploadImage(true);
+                  }}
+                >
+                  適用
+                </button>
+              </div>
             </Modal>
             <input
               placeholder="ユーザー名"
