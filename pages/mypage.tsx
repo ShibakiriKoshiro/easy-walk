@@ -28,17 +28,21 @@ const Mypage = () => {
   } = useForm<Inputs>();
   const onSubmit = (data) => console.log(data);
 
+  //　ユーザーが入ってから実行
   useEffect(() => {
-    const userDoc = doc(db, `users/FnBNsBdPztUlfSz0Dq5UBK3H5XD3`);
+    if (user?.uid) {
+      const userDoc = doc(db, `users/${user.uid}`);
 
-    getDoc(userDoc).then((result) => {
-      const userData = result.data();
-      const photo = userData?.avatarUrl;
-      if (photo) {
-        setPreview(photo);
-      }
-    });
-  }, []);
+      getDoc(userDoc).then((result) => {
+        const userData = result.data();
+        const photo = userData?.avatarUrl;
+        if (photo) {
+          setPreview(photo);
+        }
+      });
+    }
+    // 第二引数は、ロードする条件指定
+  }, [user?.uid]);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 

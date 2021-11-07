@@ -9,9 +9,6 @@ import { useForm } from 'react-hook-form';
 import Heading from '../../components/Heading';
 import { storage } from '../../libs/firebase';
 
-const QuillNoSSRWrapper = dynamic(import('react-quill'), {
-  ssr: false,
-});
 type Inputs = {
   title: string;
   description: string;
@@ -19,46 +16,6 @@ type Inputs = {
   status: 'public' | 'private';
   value: string;
 };
-
-const modules = {
-  toolbar: [
-    [{ header: '1' }, { header: '2' }, { font: [] }],
-    [{ size: [] }],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [
-      { list: 'ordered' },
-      { list: 'bullet' },
-      { indent: '-1' },
-      { indent: '+1' },
-    ],
-    ['link', 'image', 'video'],
-    ['clean'],
-  ],
-  clipboard: {
-    // toggle to add extra line breaks when pasting HTML:
-    matchVisual: false,
-  },
-};
-/*
- * Quill editor formats
- * See https://quilljs.com/docs/formats/
- */
-const formats = [
-  'header',
-  'font',
-  'size',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'blockquote',
-  'list',
-  'bullet',
-  'indent',
-  'link',
-  'image',
-  'video',
-];
 
 export default function Home() {
   const {
@@ -81,8 +38,6 @@ export default function Home() {
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
-
-  const [value, setValue] = useState('');
 
   const categories = ['観光', '特産品', '体験'];
 
@@ -206,19 +161,7 @@ export default function Home() {
                 ))}
               </select>
             </div>
-            <div className="mt-6">
-              <QuillNoSSRWrapper
-                modules={modules}
-                placeholder="compose here"
-                value={value}
-                onChange={setValue}
-                formats={formats}
-                theme="snow"
-              />
-              <button onClick={(e) => onSubmit(value)}> Send post</button>
-              <p>{value}</p>
-              {parse(value)}
-            </div>
+            <div className="mt-6"></div>
             <div className="block lg:flex mt-6">
               <button className="mr-auto mt-3 block px-8 py-2 bg-red-600 hover:bg-pink-600 shadow rounded text-white font-bold">
                 削除
