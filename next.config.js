@@ -1,4 +1,8 @@
+const path = require('path');
 module.exports = {
+  sassOptions: {
+    includePaths: [path.join(__dirname, 'styles')],
+  },
   env: {
     apiKey: 'AIzaSyDtfwuNpGIdO1bwj4y59FvqWOi56z78dsQ',
     authDomain: 'easy-walk-1c26a.firebaseapp.com',
