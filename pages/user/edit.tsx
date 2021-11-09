@@ -17,6 +17,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Modal from 'react-modal';
 import styles from '../../styles/Modal.module.css';
+import Image from '@tiptap/extension-image';
 
 type Inputs = {
   title: string;
@@ -271,7 +272,6 @@ export default function Home() {
                           height: 256, // リサイズ
                         })
                         .toDataURL('image/jpeg');
-
                       // プレビューステートにセット
                       setPreview(croppedImage);
                       // ダイヤログを閉じるためにクロップターゲットを空にする
