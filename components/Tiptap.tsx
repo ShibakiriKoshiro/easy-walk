@@ -33,6 +33,7 @@ const Tiptap = () => {
 
   // クロップ対象の画像をセット
   const setImageToCropper = (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(event?.target.files?.[0] as Blob, 'クロップ対象の画像をセット');
     setTargetFile(event?.target.files?.[0] as Blob);
     event.target.value = '';
   };
@@ -69,7 +70,11 @@ const Tiptap = () => {
   // プレビューされている内容をアップロード
   const uploadAvatar = async () => {
     // 保存先のRefを取得
-    const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+    const storageRef = ref(
+      storage,
+      // 実際はarticleIdを取得して動的に
+      `articles/uzRi3G661FQ3UpL82I6e/img`
+    );
     console.log(storageRef);
     console.log(preview);
     console.log(user);
@@ -77,15 +82,15 @@ const Tiptap = () => {
     await uploadString(storageRef, preview as string, 'data_url');
 
     // アップロードした画像を表示するためのURLを取得
-    const avatarUrl = await getDownloadURL(storageRef);
+    const photoUrl = await getDownloadURL(storageRef);
 
-    // ユーザードキュメントに反映
-    const userDoc = doc(db, `users/${user.uid}`);
+    // FireStoreArticleテーブルに反映
+    const userDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
 
     setDoc(
       userDoc,
       {
-        avatarUrl,
+        photoUrl,
       },
       {
         merge: true,
@@ -95,22 +100,40 @@ const Tiptap = () => {
     });
     const addImage = () => {
       // 実際には、ダイアログ立ち上げてクロッピング&アップロード&画像表示URL取得
-      const imageURL = window.prompt(avatarUrl);
+      const imageURL = photoUrl;
 
       if (imageURL) {
         editor.chain().focus().setImage({ src: imageURL }).run();
       }
     };
+    addImage();
+  };
+
+  const articleUpload = () => {
+    const json = editor.getJSON();
+    console.log(json);
+    const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
+    setDoc(
+      articleDoc,
+      {
+        json,
+      },
+      {
+        merge: true,
+      }
+    ).then(() => {
+      alert('保存完了');
+    });
   };
   //　実際には、記事が入ってから実行
 
   /*  useEffect(() => {
     if (user?.uid) {
-      const userDoc = doc(db, `users/${user.uid}`);
+      const userDoc = doc(db, `articles/${user.uid}`);
 
       getDoc(userDoc).then((result) => {
         const userData = result.data();
-        const photo = userData?.avatarUrl;
+        const photo = userData?.photoUrl;
         if (photo) {
           setPreview(photo);
         }
@@ -127,6 +150,12 @@ const Tiptap = () => {
     return (
       <>
         <div className="grid gap-1 sm:gap-3 grid-cols-8 sm:grid-cols-8">
+          <button
+            onClick={() => editor.chain().focus().setParagraph().run()}
+            className={editor.isActive('paragraph') ? 'is-active' : ''}
+          >
+            P
+          </button>
           <button
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={
@@ -224,43 +253,6 @@ const Tiptap = () => {
               />
             </label>
           </div>
-          <Modal
-            isOpen={!!targetFile}
-            onAfterOpen={initCropper}
-            onRequestClose={() => setTargetFile(null)}
-            contentLabel="Example Modal"
-            className={styles.modal}
-            overlayClassName={styles.overlay}
-          >
-            <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
-
-            <div className="max-w-sm h-60 pb-4 border-b mb-4">
-              <img id="image" className="block w-full" alt="" />
-            </div>
-
-            <div className="text-right w-full">
-              <button
-                className="px-4 py-3 shadow rounded bg-gray-700 text-white"
-                type="submit"
-                onClick={() => {
-                  // プレビューステートにクロッピング結果を格納
-                  const croppedImage = cropper
-                    ?.getCroppedCanvas({
-                      width: 256, // リサイズ
-                      height: 256, // リサイズ
-                    })
-                    .toDataURL('image/jpeg');
-
-                  // プレビューステートにセット
-                  setPreview(croppedImage);
-                  // ダイヤログを閉じるためにクロップターゲットを空にする
-                  setTargetFile(null);
-                }}
-              >
-                KKK
-              </button>
-            </div>
-          </Modal>
         </div>
       </>
     );
@@ -281,7 +273,12 @@ const Tiptap = () => {
       TableCell,
       Image,
     ],
-    content: '<p>Hello World! 🌎️</p>',
+    content: {
+      type: 'doc',
+      content: [
+        // …
+      ],
+    },
     editorProps: {
       attributes: {
         class:
@@ -294,11 +291,49 @@ const Tiptap = () => {
     <>
       <div>
         <MenuBar editor={editor} />
+        <Modal
+          isOpen={!!targetFile}
+          onAfterOpen={initCropper}
+          onRequestClose={() => setTargetFile(null)}
+          ariaHideApp={false}
+          className={styles.modal}
+          overlayClassName={styles.overlay}
+        >
+          <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
+
+          <div className="max-w-sm h-60 pb-4 border-b mb-4">
+            <img id="image" className="block w-full" alt="" />
+          </div>
+
+          <div className="text-right w-full">
+            <button
+              className="px-4 py-3 shadow rounded bg-gray-700 text-white"
+              type="submit"
+              onClick={() => {
+                // プレビューステートにクロッピング結果を格納
+                const croppedImage = cropper
+                  ?.getCroppedCanvas({
+                    width: 256, // リサイズ
+                    height: 256, // リサイズ
+                  })
+                  .toDataURL('image/jpeg');
+
+                // プレビューステートにセット
+                setPreview(croppedImage);
+                // ダイヤログを閉じるためにクロップターゲットを空にする
+                setTargetFile(null);
+              }}
+            >
+              KKK
+            </button>
+          </div>
+        </Modal>
 
         <EditorContent
           className="border-2 rounded shadow p-1 w-full outline-none"
           editor={editor}
         />
+        <button onClick={articleUpload}>JSON</button>
       </div>
     </>
   );

@@ -67,18 +67,20 @@ const Layouts: FC = (props: { children: ReactNode }) => {
     }
   };
   useEffect(() => {
-    // ${user.uid} uidを指定して取得したい
-    const userDoc = doc(db, `users/FnBNsBdPztUlfSz0Dq5UBK3H5XD3`);
+    if (user?.uid) {
+      // ${user.uid} uidを指定して取得したい
+      const userDoc = doc(db, `users/${user.uid}`);
 
-    getDoc(userDoc).then((result) => {
-      const userData = result.data();
-      const photo = userData?.avatarUrl;
-      if (photo) {
-        setUserAvatar(photo);
-      }
-    });
-  }, []);
-
+      getDoc(userDoc).then((result) => {
+        const userData = result.data();
+        const photo = userData?.avatarUrl;
+        if (photo) {
+          setUserAvatar(photo);
+        }
+      });
+    }
+    // 第二引数は、ロードする条件指定
+  }, [user?.uid]);
   return (
     <div className="min-h-screen relative top-0">
       <div className="fixed w-full h-16 bg-blue-300 z-10 top-0">

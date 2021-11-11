@@ -6,9 +6,61 @@ import {
 } from '@heroicons/react/solid';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import Blockquote from '@tiptap/extension-blockquote';
+// ImageはnextImageとかぶるためImgにした
+import Img from '@tiptap/extension-image';
+import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
+import { auth, db } from '../../../libs/firebase';
 
 const Article = () => {
+  const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
+  useEffect(() => {
+    if (articleDoc) {
+      getDoc(articleDoc).then((result) => {
+        const articleData = result.data();
+        const mainDocment: JSON = articleData?.json.content;
+        if (mainDocment) {
+          setArticle(mainDocment);
+        }
+      });
+    }
+    // 第二引数は、ロードする条件指定
+  }, []);
+  const [article, setArticle] = useState<JSON>();
+  console.log(article, 'aa');
+
+  const editor = useEditor({
+    editable: false,
+    content: article,
+    extensions: [
+      StarterKit,
+      Table.configure({
+        resizable: true,
+      }),
+      Blockquote.configure({
+        HTMLAttributes: {
+          class: 'pl-2 border-l-4 border-gray-300',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      Img,
+    ],
+    editorProps: {
+      attributes: {
+        class:
+          'prose prose-sm sm:prose lg:prose xl:prose-xl focus:outline-none m-2',
+      },
+    },
+  });
   return (
     <div className="container mt-16">
       <div className="block lg:flex">
@@ -82,6 +134,9 @@ const Article = () => {
               </div>
             </a>
           </Link>
+          <div className="w-full mt-12 mb-24">
+            <EditorContent editor={editor} />
+          </div>
         </article>
         <div className="w-full lg:w-1/12"></div>
         <div className="w-full ml-auto lg:w-3/12">
