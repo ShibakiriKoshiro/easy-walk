@@ -2,6 +2,7 @@ import { BeakerIcon, NewspaperIcon } from '@heroicons/react/solid';
 import React from 'react';
 import Heading from '../components/Heading';
 import TextLink from '../components/TextLink';
+import Tiptap from '../components/Tiptap';
 
 const Plan = () => {
   return (

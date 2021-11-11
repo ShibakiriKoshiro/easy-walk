@@ -2,16 +2,15 @@
 import { CameraIcon } from '@heroicons/react/solid';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
+import { db, storage } from '../libs/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Modal from 'react-modal';
-import { db, storage } from '../libs/firebase';
 import { useAuth } from '../libs/userContext';
 import styles from '../styles/Modal.module.css';
-
+import Modal from 'react-modal';
 type Inputs = {
   userName: string;
   profile: string;
@@ -28,17 +27,21 @@ const Mypage = () => {
   } = useForm<Inputs>();
   const onSubmit = (data) => console.log(data);
 
+  //　ユーザーが入ってから実行
   useEffect(() => {
-    const userDoc = doc(db, `users/FnBNsBdPztUlfSz0Dq5UBK3H5XD3`);
+    if (user?.uid) {
+      const userDoc = doc(db, `users/${user.uid}`);
 
-    getDoc(userDoc).then((result) => {
-      const userData = result.data();
-      const photo = userData?.avatarUrl;
-      if (photo) {
-        setPreview(photo);
-      }
-    });
-  }, []);
+      getDoc(userDoc).then((result) => {
+        const userData = result.data();
+        const photo = userData?.avatarUrl;
+        if (photo) {
+          setPreview(photo);
+        }
+      });
+    }
+    // 第二引数は、ロードする条件指定
+  }, [user?.uid]);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
