@@ -20,25 +20,9 @@ import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
 import { auth, db } from '../../../libs/firebase';
 
 const Article = () => {
-  const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
-  useEffect(() => {
-    if (articleDoc) {
-      getDoc(articleDoc).then((result) => {
-        const articleData = result.data();
-        const mainDocment: JSON = articleData?.json.content;
-        if (mainDocment) {
-          setArticle(mainDocment);
-        }
-      });
-    }
-    // 第二引数は、ロードする条件指定
-  }, []);
-  const [article, setArticle] = useState<JSON>();
-  console.log(article, 'aa');
-
   const editor = useEditor({
     editable: false,
-    content: article,
+    content: '',
     extensions: [
       StarterKit,
       Table.configure({
@@ -61,6 +45,20 @@ const Article = () => {
       },
     },
   });
+
+  useEffect(() => {
+    if (editor) {
+      const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
+      getDoc(articleDoc).then((result) => {
+        const articleData = result.data();
+        const mainDocment: JSON = articleData?.json;
+        if (mainDocment) {
+          editor.commands.setContent(mainDocment);
+        }
+      });
+      // 第二引数は、ロードする条件指定
+    }
+  }, [editor]);
   return (
     <div className="container mt-16">
       <div className="block lg:flex">

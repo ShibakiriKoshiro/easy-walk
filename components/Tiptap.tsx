@@ -53,8 +53,8 @@ const Tiptap = () => {
 
       // クロッパーの初期化
       const wrapper = new Cropper(image, {
-        aspectRatio: 1 / 1,
-        cropBoxResizable: false,
+        aspectRatio: 16 / 9,
+        // cropBoxResizable: false,
         // cropBoxMovable: false,
         dragMode: 'move',
         viewMode: 3,
@@ -73,7 +73,7 @@ const Tiptap = () => {
     const storageRef = ref(
       storage,
       // 実際はarticleIdを取得して動的に
-      `articles/uzRi3G661FQ3UpL82I6e/img`
+      `articles/uzRi3G661FQ3UpL82I6e/${Date.now()}`
     );
     console.log(storageRef);
     console.log(preview);
@@ -313,8 +313,8 @@ const Tiptap = () => {
                 // プレビューステートにクロッピング結果を格納
                 const croppedImage = cropper
                   ?.getCroppedCanvas({
-                    width: 256, // リサイズ
-                    height: 256, // リサイズ
+                    width: 960, // リサイズ
+                    height: 540, // リサイズ
                   })
                   .toDataURL('image/jpeg');
 
