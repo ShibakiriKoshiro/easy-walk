@@ -1,7 +1,7 @@
 import { BeakerIcon } from '@heroicons/react/solid';
 import React from 'react';
-import ArticleCard from '../components/ArticleCard';
-import Heading from '../components/Heading';
+import ArticleCard from '../../components/ArticleCard';
+import Heading from '../../components/Heading';
 
 const MyList = () => {
   return (

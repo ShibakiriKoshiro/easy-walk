@@ -1,8 +1,8 @@
 import { BeakerIcon } from '@heroicons/react/solid';
 import React from 'react';
-import ArticleCard from '../components/ArticleCard';
-import Heading from '../components/Heading';
-import Article from '../types/article-card';
+import ArticleCard from '../../components/ArticleCard';
+import Heading from '../../components/Heading';
+import Article from '../../types/article-card';
 
 type Props = {
   articles: Article[];

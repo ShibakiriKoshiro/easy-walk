@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import style from '../styles/tiptap.module.scss';
@@ -20,7 +20,7 @@ import Modal from 'react-modal';
 import styles from '../styles/Modal.module.css';
 import { CameraIcon } from '@heroicons/react/solid';
 
-const Tiptap = () => {
+const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) => {
   const { user } = useAuth();
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
@@ -110,13 +110,13 @@ const Tiptap = () => {
   };
 
   const articleUpload = () => {
-    const json = editor.getJSON();
-    console.log(json);
+    const body = editor.getJSON();
+    console.log(body);
     const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
     setDoc(
       articleDoc,
       {
-        json,
+        body,
       },
       {
         merge: true,
@@ -149,7 +149,7 @@ const Tiptap = () => {
 
     return (
       <>
-        <div className="grid gap-1 sm:gap-3 grid-cols-8 sm:grid-cols-8">
+        <div className="flex items-center gap-3 border-b-2">
           <button
             onClick={() => editor.chain().focus().setParagraph().run()}
             className={editor.isActive('paragraph') ? 'is-active' : ''}
@@ -239,15 +239,15 @@ const Tiptap = () => {
           >
             Table
           </button>
-          <div className="mt-6 flex">
-            <label className="h-full mt-auto -ml-6 cursor-pointer">
+          <div className="flex">
+            <label className="h-full mt-auto cursor-pointer">
               <input
                 onChange={setImageToCropper}
                 type="file"
                 className="hidden"
               />
               <CameraIcon
-                className="h-10 w-10 mt-12"
+                className="h-10 w-10"
                 fill="none"
                 stroke="currentColor"
               />
@@ -273,13 +273,9 @@ const Tiptap = () => {
       TableCell,
       Image,
     ],
-    content: {
-      type: 'doc',
-      content: [
-        // …
-      ],
-    },
+    content,
     editorProps: {
+      editable: () => editable,
       attributes: {
         class:
           'prose prose-sm sm:prose lg:prose xl:prose-xl focus:outline-none m-2',
@@ -287,54 +283,60 @@ const Tiptap = () => {
     },
   });
 
+  useEffect(() => {
+    if (editor?.isActive) {
+      editor.commands?.setContent(content || '');
+    }
+  }, [content, editor]);
+
   return (
     <>
-      <div>
-        <MenuBar editor={editor} />
-        <Modal
-          isOpen={!!targetFile}
-          onAfterOpen={initCropper}
-          onRequestClose={() => setTargetFile(null)}
-          ariaHideApp={false}
-          className={styles.modal}
-          overlayClassName={styles.overlay}
-        >
-          <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
+      {editable && (
+        <div className="">
+          <MenuBar editor={editor} />
+          <Modal
+            isOpen={!!targetFile}
+            onAfterOpen={initCropper}
+            onRequestClose={() => setTargetFile(null)}
+            ariaHideApp={false}
+            className={styles.modal}
+            overlayClassName={styles.overlay}
+          >
+            <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
 
-          <div className="max-w-sm h-60 pb-4 border-b mb-4">
-            <img id="image" className="block w-full" alt="" />
-          </div>
+            <div className="max-w-sm h-60 pb-4 border-b mb-4">
+              <img id="image" className="block w-full" alt="" />
+            </div>
 
-          <div className="text-right w-full">
-            <button
-              className="px-4 py-3 shadow rounded bg-gray-700 text-white"
-              type="submit"
-              onClick={() => {
-                // プレビューステートにクロッピング結果を格納
-                const croppedImage = cropper
-                  ?.getCroppedCanvas({
-                    width: 960, // リサイズ
-                    height: 540, // リサイズ
-                  })
-                  .toDataURL('image/jpeg');
+            <div className="text-right w-full">
+              <button
+                className="px-4 py-3 shadow rounded bg-gray-700 text-white"
+                type="submit"
+                onClick={() => {
+                  // プレビューステートにクロッピング結果を格納
+                  const croppedImage = cropper
+                    ?.getCroppedCanvas({
+                      width: 960, // リサイズ
+                      height: 540, // リサイズ
+                    })
+                    .toDataURL('image/jpeg');
 
-                // プレビューステートにセット
-                setPreview(croppedImage);
-                // ダイヤログを閉じるためにクロップターゲットを空にする
-                setTargetFile(null);
-              }}
-            >
-              KKK
-            </button>
-          </div>
-        </Modal>
-
-        <EditorContent
-          className="border-2 rounded shadow p-1 w-full outline-none"
-          editor={editor}
-        />
-        <button onClick={articleUpload}>JSON</button>
+                  // プレビューステートにセット
+                  setPreview(croppedImage);
+                  // ダイヤログを閉じるためにクロップターゲットを空にする
+                  setTargetFile(null);
+                }}
+              >
+                KKK
+              </button>
+            </div>
+          </Modal>
+        </div>
+      )}
+      <div className={editable ? 'border' : ''}>
+        <EditorContent className="w-full" editor={editor} />
       </div>
+      {editable && <button onClick={articleUpload}>JSON</button>}
     </>
   );
 };

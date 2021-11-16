@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react-hooks/rules-of-hooks */
 import {
   FlagIcon,
   QuestionMarkCircleIcon,
@@ -17,64 +19,23 @@ import Blockquote from '@tiptap/extension-blockquote';
 // ImageはnextImageとかぶるためImgにした
 import Img from '@tiptap/extension-image';
 import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
-import { auth, db } from '../../../libs/firebase';
+import { auth, db } from '../../libs/firebase';
+import Tiptap from '../../components/Tiptap';
+import { adminDB } from '../../libs/firebase-admin';
+import { useRouter } from 'next/router';
+import { GetStaticPaths, GetStaticProps } from 'next';
 
-const Article = () => {
-  const editor = useEditor({
-    editable: false,
-    content: '',
-    extensions: [
-      StarterKit,
-      Table.configure({
-        resizable: true,
-      }),
-      Blockquote.configure({
-        HTMLAttributes: {
-          class: 'pl-2 border-l-4 border-gray-300',
-        },
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      Img,
-    ],
-    editorProps: {
-      attributes: {
-        class:
-          'prose prose-sm sm:prose lg:prose xl:prose-xl focus:outline-none m-2',
-      },
-    },
-  });
-
-  useEffect(() => {
-    if (editor) {
-      const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
-      getDoc(articleDoc).then((result) => {
-        const articleData = result.data();
-        const mainDocment: JSON = articleData?.json;
-        if (mainDocment) {
-          editor.commands.setContent(mainDocment);
-        }
-      });
-      // 第二引数は、ロードする条件指定
-    }
-  }, [editor]);
+const Article = ({ content = '', title, thumbnail }) => {
   return (
     <div className="container mt-16">
       <div className="block lg:flex">
         <div className="w-full lg:w-2/12"></div>
         <article className="w-full lg:w-6/12">
           <div className="mx-auto">
-            <Image
-              src="/images/village.png"
-              layout="responsive"
-              width={700}
-              height={475}
-              alt="photo"
-            />
+            <img src={thumbnail} width={700} height={475} alt="photo" />
           </div>
           <div className="flex items-center">
-            <h1 className="text-4xl mt-3">Hello Title h1</h1>
+            <h1 className="text-4xl mt-3">{title}</h1>
             <button className="ml-auto">
               <ThumbUpIcon
                 className="h-10 w-10"
@@ -133,7 +94,7 @@ const Article = () => {
             </a>
           </Link>
           <div className="w-full mt-12 mb-24">
-            <EditorContent editor={editor} />
+            <Tiptap editable={false} content={content} />
           </div>
         </article>
         <div className="w-full lg:w-1/12"></div>
@@ -154,3 +115,36 @@ const Article = () => {
 };
 
 export default Article;
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  return { paths: [], fallback: 'blocking' };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const snap = await adminDB.doc(`articles/${context.params.articleId}`).get();
+  const article = snap.data();
+
+  return {
+    props: {
+      content: article?.body,
+      title: article?.title,
+      thumbnail: article?.thumbnail,
+    },
+    revalidate: 3000,
+    // will be passed to the page component as props
+  };
+};
+
+// useEffect(() => {
+//   if (editor) {
+//     const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
+//     getDoc(articleDoc).then((result) => {
+//       const articleData = result.data();
+//       const mainDocment: JSON = articleData?.json;
+//       if (mainDocment) {
+//         editor.commands.setContent(mainDocment);
+//       }
+//     });
+//     // 第二引数は、ロードする条件指定
+//   }
+// }, [editor]);

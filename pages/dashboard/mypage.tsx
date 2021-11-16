@@ -2,14 +2,14 @@
 import { CameraIcon } from '@heroicons/react/solid';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { db, storage } from '../libs/firebase';
+import { db, storage } from '../../libs/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAuth } from '../libs/userContext';
-import styles from '../styles/Modal.module.css';
+import { useAuth } from '../../libs/userContext';
+import styles from '../../styles/Modal.module.css';
 import Modal from 'react-modal';
 type Inputs = {
   userName: string;

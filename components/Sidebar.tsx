@@ -50,7 +50,7 @@ const Sidebar = () => {
       ],
     },
     {
-      href: '/',
+      href: '/stamp',
       label: 'スタンプラリー',
       icon: (
         <PuzzleIcon className="h-6 w-6" fill="none" stroke="currentColor" />

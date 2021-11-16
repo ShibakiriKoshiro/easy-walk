@@ -5,29 +5,33 @@ import parse from 'html-react-parser';
 import dynamic from 'next/dynamic';
 import React, { FormEvent, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Heading from '../../components/Heading';
-import Tiptap from '../../components/Tiptap';
+import Heading from '../../../components/Heading';
+import Tiptap from '../../../components/Tiptap';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { useAuth } from '../../libs/userContext';
+import { useAuth } from '../../../libs/userContext';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { db, storage } from '../../libs/firebase';
+import { db, storage } from '../../../libs/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Modal from 'react-modal';
-import styles from '../../styles/Modal.module.css';
+import styles from '../../../styles/Modal.module.css';
 import Image from '@tiptap/extension-image';
+import { useRouter } from 'next/router';
+import { GetStaticPaths, GetStaticProps } from 'next';
+import { adminDB } from '../../../libs/firebase-admin';
 
 type Inputs = {
   title: string;
   description: string;
   category: string;
   status: 'public' | 'private';
-  value: string;
 };
 
 export default function Home() {
+  const router = useRouter();
+  const { pid } = router.query;
   const { user } = useAuth();
   const {
     register,
@@ -37,7 +41,30 @@ export default function Home() {
   } = useForm<Inputs>();
 
   const onSubmit = (data) => {
-    console.log(data);
+    const status = data.status;
+    const category = data.category;
+    const title = data.title;
+    const description = data.description;
+    const articleDoc = doc(
+      db,
+      // 本来は動的に記事idを取得
+      `articles/uzRi3G661FQ3UpL82I6e`
+    );
+
+    setDoc(
+      articleDoc,
+      {
+        status,
+        category,
+        title,
+        description,
+      },
+      {
+        merge: true,
+      }
+    ).then(() => {
+      alert('保存完了');
+    });
   };
 
   const [title, setTitle] = useState('');
@@ -49,24 +76,40 @@ export default function Home() {
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
-
   const categories = ['観光', '特産品', '体験'];
+  const [body, setBody] = useState();
 
-  //　ユーザーが入ってから実行
+  //　記事idを取得後記事の中身をセット
   useEffect(() => {
-    if (user?.uid) {
-      const userDoc = doc(db, `users/${user.uid}`);
+    const defaultDoc = doc(
+      db,
+      // 本来はarticleIdが入ってから取得
+      `articles/uzRi3G661FQ3UpL82I6e`
+    );
 
-      getDoc(userDoc).then((result) => {
-        const userData = result.data();
-        const photo = userData?.avatarUrl;
-        if (photo) {
-          setPreview(photo);
-        }
-      });
-    }
+    getDoc(defaultDoc).then((result) => {
+      const articleData = result.data();
+      const defaultPhoto = articleData.thumbnail;
+      const defaultTitle = articleData.title;
+      const defaultDescription = articleData.description;
+      const defaultBody = articleData.body;
+
+      if (defaultBody) {
+        setBody(defaultBody);
+        console.log(defaultBody);
+      }
+      if (defaultDescription) {
+        setDescription(defaultDescription);
+      }
+      if (defaultTitle) {
+        setTitle(defaultTitle);
+      }
+      if (defaultPhoto) {
+        setPreview(defaultPhoto);
+      }
+    });
     // 第二引数は、ロードする条件指定
-  }, [user?.uid]);
+  }, []);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
@@ -101,7 +144,7 @@ export default function Home() {
 
       // クロッパーの初期化
       const wrapper = new Cropper(image, {
-        aspectRatio: 1 / 1,
+        aspectRatio: 16 / 9,
         cropBoxResizable: false,
         // cropBoxMovable: false,
         dragMode: 'move',
@@ -119,21 +162,26 @@ export default function Home() {
   // プレビューされている内容をアップロード
   const uploadAvatar = async () => {
     // 保存先のRefを取得
-    const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+    const storageRef = ref(
+      storage,
+      // 本来はarticleIdを動的に取得
+      `articles/uzRi3G661FQ3UpL82I6e/thumbnail.jpg`
+    );
 
     // 画像アップロード
     await uploadString(storageRef, preview as string, 'data_url');
 
     // アップロードした画像を表示するためのURLを取得
-    const avatarUrl = await getDownloadURL(storageRef);
+    const thumbnail = await getDownloadURL(storageRef);
 
     // ユーザードキュメントに反映
-    const userDoc = doc(db, `users/${user.uid}`);
+    // 本来はarticleIdを動的に取得
+    const photoDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
 
     setDoc(
-      userDoc,
+      photoDoc,
       {
-        avatarUrl,
+        thumbnail,
       },
       {
         merge: true,
@@ -212,12 +260,12 @@ export default function Home() {
                 {preview ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    className="w-20 h-20 rounded-full overflow-hidden border block"
+                    className="h-36 w-64 overflow-hidden border block"
                     src={preview}
                     alt=""
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full overflow-hidden border bg-gray-400"></div>
+                  <div className="h-36 w-64 overflow-hidden border bg-gray-400"></div>
                 )}
                 <label
                   htmlFor="avatar"
@@ -268,8 +316,8 @@ export default function Home() {
                       // プレビューステートにクロッピング結果を格納
                       const croppedImage = cropper
                         ?.getCroppedCanvas({
-                          width: 256, // リサイズ
-                          height: 256, // リサイズ
+                          width: 960, // リサイズ
+                          height: 540, // リサイズ
                         })
                         .toDataURL('image/jpeg');
                       // プレビューステートにセット
@@ -284,8 +332,8 @@ export default function Home() {
                 </div>
               </Modal>
             </div>
-            <div className="mt-6">
-              <Tiptap />
+            <div className="mt-6 ">
+              <Tiptap content={body} />
             </div>
             <div className="block lg:flex mt-6">
               <button className="mr-auto mt-3 block px-8 py-2 bg-red-600 hover:bg-pink-600 shadow rounded text-white font-bold">

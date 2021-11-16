@@ -1,7 +1,7 @@
 import { BeakerIcon } from '@heroicons/react/solid';
 import React from 'react';
-import Heading from '../components/Heading';
-import StampCard from '../components/StampCard';
+import Heading from '../../components/Heading';
+import StampCard from '../../components/StampCard';
 
 const Stamp = () => {
   return (

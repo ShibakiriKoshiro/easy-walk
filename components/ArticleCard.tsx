@@ -30,7 +30,7 @@ const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
               <p className="text-lg font-medium hover:underline flex-1">
                 {title}
               </p>
-              <Link href="/user">
+              <Link href="user/article/1">
                 <a>
                   <div className="flex items-center">
                     <div className="mt-2">
