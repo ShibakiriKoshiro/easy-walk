@@ -19,9 +19,12 @@ import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Modal from 'react-modal';
 import styles from '../styles/Modal.module.css';
 import { CameraIcon } from '@heroicons/react/solid';
+import { useRouter } from 'next/router';
 
 const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) => {
   const { user } = useAuth();
+  const router = useRouter();
+  const { articleId } = router.query;
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
@@ -73,7 +76,7 @@ const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) =>
     const storageRef = ref(
       storage,
       // 実際はarticleIdを取得して動的に
-      `articles/uzRi3G661FQ3UpL82I6e/${Date.now()}`
+      `articles/${articleId}/${Date.now()}`
     );
     console.log(storageRef);
     console.log(preview);
@@ -85,7 +88,7 @@ const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) =>
     const photoUrl = await getDownloadURL(storageRef);
 
     // FireStoreArticleテーブルに反映
-    const userDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
+    const userDoc = doc(db, `articles/${articleId}/`);
 
     setDoc(
       userDoc,
@@ -112,7 +115,7 @@ const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) =>
   const articleUpload = () => {
     const body = editor.getJSON();
     console.log(body);
-    const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
+    const articleDoc = doc(db, `articles/${articleId}/`);
     setDoc(
       articleDoc,
       {

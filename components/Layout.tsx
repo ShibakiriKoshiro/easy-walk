@@ -1,6 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
 import { Dialog, Transition } from '@headlessui/react';
-import { MenuIcon, SearchIcon } from '@heroicons/react/solid';
+import {
+  BookmarkIcon,
+  GlobeIcon,
+  MenuIcon,
+  NewspaperIcon,
+  SearchIcon,
+  UserIcon,
+} from '@heroicons/react/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { FC, Fragment, ReactNode, useEffect, useState } from 'react';
@@ -11,7 +18,7 @@ import Sidebar from './Sidebar';
 import Image from 'next/image';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import {
   ChartBarIcon,
   CursorClickIcon,
@@ -25,18 +32,23 @@ import {
 const solutions = [
   {
     name: 'マイページ',
-    href: '/mypage',
-    icon: ChartBarIcon,
+    href: '/dashboard/mypage',
+    icon: UserIcon,
+  },
+  {
+    name: 'マイリスト',
+    href: '/dashboard/my-list',
+    icon: BookmarkIcon,
   },
   {
     name: '記事管理',
-    href: '/admin/edit',
-    icon: CursorClickIcon,
+    href: '/dashboard/articles',
+    icon: NewspaperIcon,
   },
   {
-    name: 'プラン',
-    href: '/plan',
-    icon: ShieldCheckIcon,
+    name: 'スタンプ',
+    href: '/dashboard/stamp',
+    icon: GlobeIcon,
   },
 ];
 const callsToAction = [
@@ -81,6 +93,7 @@ const Layouts: FC = (props: { children: ReactNode }) => {
     }
     // 第二引数は、ロードする条件指定
   }, [user?.uid]);
+
   return (
     <div className="min-h-screen relative top-0">
       <div className="fixed w-full h-16 bg-blue-300 z-10 top-0">

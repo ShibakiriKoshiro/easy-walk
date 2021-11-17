@@ -13,7 +13,7 @@ import { useAuth } from '../../../libs/userContext';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { db, storage } from '../../../libs/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Modal from 'react-modal';
 import styles from '../../../styles/Modal.module.css';
@@ -31,7 +31,7 @@ type Inputs = {
 
 export default function Home() {
   const router = useRouter();
-  const { pid } = router.query;
+  const { articleId } = router.query;
   const { user } = useAuth();
   const {
     register,
@@ -48,7 +48,7 @@ export default function Home() {
     const articleDoc = doc(
       db,
       // 本来は動的に記事idを取得
-      `articles/uzRi3G661FQ3UpL82I6e`
+      `articles/${articleId}`
     );
 
     setDoc(
@@ -81,35 +81,43 @@ export default function Home() {
 
   //　記事idを取得後記事の中身をセット
   useEffect(() => {
+    if (!articleId) {
+      return;
+    }
+
     const defaultDoc = doc(
       db,
       // 本来はarticleIdが入ってから取得
-      `articles/uzRi3G661FQ3UpL82I6e`
+      `articles/${articleId}`
     );
+    console.log(articleId, 'articleId');
 
     getDoc(defaultDoc).then((result) => {
       const articleData = result.data();
-      const defaultPhoto = articleData.thumbnail;
-      const defaultTitle = articleData.title;
-      const defaultDescription = articleData.description;
-      const defaultBody = articleData.body;
+      console.log(articleData, '記事データ');
+      if (articleData) {
+        const defaultPhoto = articleData.thumbnail;
+        const defaultTitle = articleData.title;
+        const defaultDescription = articleData.description;
+        const defaultBody = articleData.body;
 
-      if (defaultBody) {
-        setBody(defaultBody);
-        console.log(defaultBody);
-      }
-      if (defaultDescription) {
-        setDescription(defaultDescription);
-      }
-      if (defaultTitle) {
-        setTitle(defaultTitle);
-      }
-      if (defaultPhoto) {
-        setPreview(defaultPhoto);
+        if (defaultBody) {
+          setBody(defaultBody);
+          console.log(defaultBody);
+        }
+        if (defaultDescription) {
+          setDescription(defaultDescription);
+        }
+        if (defaultTitle) {
+          setTitle(defaultTitle);
+        }
+        if (defaultPhoto) {
+          setPreview(defaultPhoto);
+        }
       }
     });
     // 第二引数は、ロードする条件指定
-  }, []);
+  }, [articleId]);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
@@ -165,7 +173,7 @@ export default function Home() {
     const storageRef = ref(
       storage,
       // 本来はarticleIdを動的に取得
-      `articles/uzRi3G661FQ3UpL82I6e/thumbnail.jpg`
+      `articles/${articleId}/thumbnail.jpg`
     );
 
     // 画像アップロード
@@ -176,7 +184,7 @@ export default function Home() {
 
     // ユーザードキュメントに反映
     // 本来はarticleIdを動的に取得
-    const photoDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e`);
+    const photoDoc = doc(db, `articles/${articleId}`);
 
     setDoc(
       photoDoc,
@@ -190,6 +198,10 @@ export default function Home() {
       SetUploadImage(false);
       alert('保存完了');
     });
+  };
+  const aid = () => {
+    const newCityRef = doc(collection(db, 'cities'));
+    console.log(newCityRef.id);
   };
 
   return (

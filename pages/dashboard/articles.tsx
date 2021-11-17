@@ -1,8 +1,15 @@
 import { BeakerIcon, PencilIcon } from '@heroicons/react/solid';
 import React from 'react';
 import Heading from '../../components/Heading';
-
+import { useRouter } from 'next/router';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../libs/firebase';
 const Management = () => {
+  const router = useRouter();
+  const toEditPage = () => {
+    const { id } = doc(collection(db, 'articles'));
+    router.push(`/user/${id}/edit`);
+  };
   return (
     <div>
       <Heading>
@@ -10,6 +17,14 @@ const Management = () => {
         <p className="text-xl font-bold">見出しです！</p>
       </Heading>
       <div className="container">
+        <div className="w-full text-right my-3">
+          <button
+            onClick={toEditPage}
+            className="rounded p-2 bg-blue-500 shadow text-white"
+          >
+            投稿する
+          </button>
+        </div>
         <div className="border-b border-blue-gray-300">
           <div className="flex">
             <a className="font-bold hover:underline text-xl">タイトルです。</a>
