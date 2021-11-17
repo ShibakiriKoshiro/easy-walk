@@ -31,11 +31,13 @@ const Article = ({ content = '', title, thumbnail }) => {
       <div className="block lg:flex">
         <div className="w-full lg:w-2/12"></div>
         <article className="w-full lg:w-6/12">
-          <div className="mx-auto">
-            <img src={thumbnail} width={700} height={475} alt="photo" />
-          </div>
+          {thumbnail && (
+            <div className="mx-auto">
+              <img src={thumbnail} width={700} height={475} alt="photo" />
+            </div>
+          )}
           <div className="flex items-center">
-            <h1 className="text-4xl mt-3">{title}</h1>
+            {title && <h1 className="text-4xl mt-3">{title}</h1>}
             <button className="ml-auto">
               <ThumbUpIcon
                 className="h-10 w-10"
@@ -93,9 +95,11 @@ const Article = ({ content = '', title, thumbnail }) => {
               </div>
             </a>
           </Link>
-          <div className="w-full mt-12 mb-24">
-            <Tiptap editable={false} content={content} />
-          </div>
+          {content && (
+            <div className="w-full mt-12 mb-24">
+              <Tiptap editable={false} content={content} />
+            </div>
+          )}
         </article>
         <div className="w-full lg:w-1/12"></div>
         <div className="w-full ml-auto lg:w-3/12">
