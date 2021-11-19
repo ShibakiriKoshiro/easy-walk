@@ -16,11 +16,12 @@ const Signin: FC = () => {
   // 箱の中身を取り出している
   const { user } = useAuth();
   const router = useRouter();
-  useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      user && router.push('/');
-    });
-  }, []);
+
+  // useEffect(() => {
+  //   auth.onAuthStateChanged((user) => {
+  //     user && router.push('/');
+  //   });
+  // }, []);
 
   const {
     register,

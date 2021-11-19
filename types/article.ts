@@ -5,6 +5,6 @@ export type Article = {
   thumbnail: URL;
   content: JSON;
   createdAt: number;
-  uid: string;
+  writer: any;
   avatarUrl: URL;
 };

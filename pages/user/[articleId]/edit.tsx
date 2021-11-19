@@ -45,6 +45,9 @@ export default function Home() {
     const category = data.category;
     const title = data.title;
     const description = data.description;
+    const writerId = user.uid;
+    const writerAvater = user.avatarUrl;
+    const writerName = user.name;
     const articleDoc = doc(
       db,
       // 本来は動的に記事idを取得
@@ -54,6 +57,9 @@ export default function Home() {
     setDoc(
       articleDoc,
       {
+        writerId,
+        writerAvater,
+        writerName,
         status,
         category,
         title,
@@ -78,6 +84,14 @@ export default function Home() {
   };
   const categories = ['観光', '特産品', '体験'];
   const [body, setBody] = useState();
+  const [status, setStatus] = useState();
+  const [category, setCategory] = useState();
+  const handleStatus = (event) => {
+    setStatus(event.target.value);
+  };
+  const handleCategory = (event) => {
+    setCategory(event.target.value);
+  };
 
   //　記事idを取得後記事の中身をセット
   useEffect(() => {
@@ -96,6 +110,8 @@ export default function Home() {
       const articleData = result.data();
       console.log(articleData, '記事データ');
       if (articleData) {
+        const defaultStatus = articleData.status;
+        const defaultCategory = articleData.category;
         const defaultPhoto = articleData.thumbnail;
         const defaultTitle = articleData.title;
         const defaultDescription = articleData.description;
@@ -104,6 +120,12 @@ export default function Home() {
         if (defaultBody) {
           setBody(defaultBody);
           console.log(defaultBody);
+        }
+        if (defaultCategory) {
+          setCategory(defaultCategory);
+        }
+        if (defaultStatus) {
+          setStatus(defaultStatus);
         }
         if (defaultDescription) {
           setDescription(defaultDescription);
@@ -199,10 +221,6 @@ export default function Home() {
       alert('保存完了');
     });
   };
-  const aid = () => {
-    const newCityRef = doc(collection(db, 'cities'));
-    console.log(newCityRef.id);
-  };
 
   return (
     <>
@@ -226,6 +244,8 @@ export default function Home() {
                 autoComplete="country"
                 className="text-lg font-bold ml-auto mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 {...register('status', { required: true })}
+                value={status}
+                onChange={(event) => handleStatus(event)}
               >
                 <option value="public">公開</option>
                 <option value="private">非公開</option>
@@ -243,6 +263,8 @@ export default function Home() {
                   autoComplete="country"
                   className="ml-auto text-lg font-bold mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   {...register('category', { required: true })}
+                  value={category}
+                  onChange={(event) => handleCategory(event)}
                 >
                   {categories.map((category) => (
                     <option key={category}>{category}</option>

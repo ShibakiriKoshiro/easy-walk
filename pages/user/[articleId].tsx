@@ -25,7 +25,15 @@ import { adminDB } from '../../libs/firebase-admin';
 import { useRouter } from 'next/router';
 import { GetStaticPaths, GetStaticProps } from 'next';
 
-const Article = ({ content = '', title, thumbnail }) => {
+const Article = ({
+  content = '',
+  title,
+  thumbnail,
+  writerId,
+  writerAvater,
+  writerName,
+}) => {
+  console.log(writerAvater);
   return (
     <div className="container mt-16">
       <div className="block lg:flex">
@@ -81,15 +89,17 @@ const Article = ({ content = '', title, thumbnail }) => {
           <Link href="#">
             <a>
               <div className="flex items-center">
-                <Image
-                  src="/images/village.png"
-                  width={64}
-                  height={64}
-                  alt="photo"
-                  className="rounded-full"
-                />
+                {writerAvater && (
+                  <img
+                    src={writerAvater}
+                    width={64}
+                    height={64}
+                    alt="photo"
+                    className="rounded-full"
+                  />
+                )}
                 <div className="ml-3">
-                  <p className="font-bold text-xl">ユーザー名</p>
+                  <p className="font-bold text-xl">{writerName}</p>
                   <p className="text-md text-gray-400">2021/9/28</p>
                 </div>
               </div>
@@ -133,6 +143,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
       content: article?.body,
       title: article?.title,
       thumbnail: article?.thumbnail,
+      writerId: article?.writerId,
+      writerAvater: article?.writerAvater,
+      writerName: article?.writerName,
     },
     revalidate: 3000,
     // will be passed to the page component as props

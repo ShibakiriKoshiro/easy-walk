@@ -4,6 +4,7 @@ import Heading from '../../components/Heading';
 import { useRouter } from 'next/router';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../libs/firebase';
+import Dashboard from '../../components/dashboard';
 const Management = () => {
   const router = useRouter();
   const toEditPage = () => {
@@ -17,6 +18,7 @@ const Management = () => {
         <p className="text-xl font-bold">見出しです！</p>
       </Heading>
       <div className="container">
+        <Dashboard select={true} />
         <div className="w-full text-right my-3">
           <button
             onClick={toEditPage}

@@ -4,7 +4,12 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { db, storage } from '../../libs/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import {
+  getDownloadURL,
+  ref,
+  uploadBytes,
+  uploadString,
+} from 'firebase/storage';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -13,7 +18,7 @@ import styles from '../../styles/Modal.module.css';
 import Modal from 'react-modal';
 type Inputs = {
   userName: string;
-  profile: string;
+  description: string;
   link: URL;
 };
 
@@ -25,18 +30,41 @@ const Mypage = () => {
     watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const onSubmit = (data) => console.log(data);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [link, setLink] = useState('');
+  const handleName = (event) => {
+    setName(event.target.value);
+  };
+  const handleDescription = (event) => {
+    setDescription(event.target.value);
+  };
+  const handleLink = (event) => {
+    setLink(event.target.value);
+  };
 
   //　ユーザーが入ってから実行
   useEffect(() => {
     if (user?.uid) {
       const userDoc = doc(db, `users/${user.uid}`);
-
       getDoc(userDoc).then((result) => {
         const userData = result.data();
-        const photo = userData?.avatarUrl;
-        if (photo) {
-          setPreview(photo);
+        const defaultPhoto = userData?.avatarUrl;
+        const defaultName = userData?.name;
+        const defaultDescription = userData?.description;
+        const defaultLink = userData?.link;
+        if (defaultName) {
+          setName(defaultName);
+        }
+        if (defaultDescription) {
+          setDescription(defaultDescription);
+        }
+        if (defaultLink) {
+          setLink(defaultLink);
+        }
+
+        if (defaultPhoto) {
+          setPreview(defaultPhoto);
         }
       });
     }
@@ -118,13 +146,41 @@ const Mypage = () => {
       alert('保存完了');
     });
   };
+  const upload = (data) => {
+    if (uploadImage) {
+      uploadAvatar();
+    }
+    const name = data.userName;
+    const description = data.description;
+    const link = data.link;
+
+    const profileDoc = doc(
+      db,
+      // 本来は動的に記事idを取得
+      `users/${user.uid}`
+    );
+    setDoc(
+      profileDoc,
+      {
+        name,
+        description,
+        link,
+      },
+      {
+        merge: true,
+      }
+    ).then(() => {
+      SetUploadImage(false);
+      alert('保存完了');
+    });
+  };
 
   return (
     <div className="pt-8 pb-16">
       <div className="container">
         <p className="font-bold">プロフィール</p>
         <div>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(upload)}>
             <div className="flex items-center">
               <div className="mt-6 flex">
                 {preview ? (
@@ -207,16 +263,22 @@ const Mypage = () => {
               placeholder="ユーザー名"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
               {...register('userName', { required: true })}
+              value={name}
+              onChange={(event) => handleName(event)}
             />
             <input
               placeholder="プロフィール"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-              {...register('profile', { required: true })}
+              {...register('description', { required: true })}
+              value={description}
+              onChange={(event) => handleDescription(event)}
             />
             <input
               placeholder="リンク"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
               {...register('link')}
+              onChange={(event) => handleLink(event)}
+              value={link}
             />
             {errors.link && (
               <p className="text-center pt-3 text-yellow-600 text-base">
@@ -254,7 +316,7 @@ const Mypage = () => {
         <p className="text-gray-600">
           有料プランに加入している場合、退会すると全ての定期購入が停止します。
         </p>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        {/* <form onSubmit={handleSubmit(onSubmit)}>
           <input
             placeholder="ユーザー名"
             className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
@@ -266,7 +328,7 @@ const Mypage = () => {
           >
             退会
           </button>
-        </form>
+        </form> */}
       </div>
     </div>
   );

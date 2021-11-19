@@ -15,11 +15,11 @@ type Inputs = {
 
 const Signup: FC = () => {
   const router = useRouter();
-  useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      user && router.push('/');
-    });
-  }, []);
+  // useEffect(() => {
+  //   auth.onAuthStateChanged((user) => {
+  //     user && router.push('/');
+  //   });
+  // }, []);
 
   const {
     register,
