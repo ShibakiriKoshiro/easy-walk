@@ -40,7 +40,7 @@ export default function Home() {
     formState: { errors },
   } = useForm<Inputs>();
 
-  const onSubmit = (data) => {
+  const upload = (data) => {
     const status = data.status;
     const category = data.category;
     const title = data.title;
@@ -230,7 +230,7 @@ export default function Home() {
       </Heading>
       <div className="container pt-8 pb-16">
         <div>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(upload)}>
             <div className="w-full">
               <label
                 htmlFor="country"
@@ -366,6 +366,7 @@ export default function Home() {
                 </div>
               </Modal>
             </div>
+
             <div className="mt-6 ">
               <Tiptap content={body} />
             </div>
