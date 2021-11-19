@@ -1,10 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-const Dashboard = (selected) => {
+const Dashboard = (select) => {
   const dashboardMenu = [
     {
       name: '記事管理',
       href: '/dashboard/articles',
+      serected: { select },
     },
     {
       name: 'マイリスト',
@@ -26,7 +27,7 @@ const Dashboard = (selected) => {
           {dashboardMenu.map((menu) => (
             <li
               className={
-                selected
+                menu.serected
                   ? 'w-full py-2 text-sm leading-5 font-medium bg-white rounded-lg text-blue-600'
                   : 'w-full py-2 text-sm leading-5 font-medium hover:bg-blue-300 rounded-lg text-black'
               }
