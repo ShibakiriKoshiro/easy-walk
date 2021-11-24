@@ -140,21 +140,19 @@ const Layouts: FC = (props: { children: ReactNode }) => {
                       <div className="rounded-lg shadow-lg overflow-hidden">
                         <div className="relative grid bg-white">
                           {solutions.map((item) => (
-                            <a
-                              key={item.name}
-                              href={item.href}
-                              className="flex hover:bg-gray-50 py-2 px-2"
-                            >
-                              <item.icon
-                                className="flex-shrink-0 h-6 w-6 text-indigo-600"
-                                aria-hidden="true"
-                              />
-                              <div className="ml-4">
-                                <p className="text-base font-medium text-gray-900">
-                                  {item.name}
-                                </p>
-                              </div>
-                            </a>
+                            <Link key={item.name} href={item.href}>
+                              <a className="flex hover:bg-gray-50 py-2 px-2">
+                                <item.icon
+                                  className="flex-shrink-0 h-6 w-6 text-indigo-600"
+                                  aria-hidden="true"
+                                />
+                                <div className="ml-4">
+                                  <p className="text-base font-medium text-gray-900">
+                                    {item.name}
+                                  </p>
+                                </div>
+                              </a>
+                            </Link>
                           ))}
                           <button
                             onClick={logOut}

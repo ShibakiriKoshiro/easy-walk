@@ -1,17 +1,30 @@
 import { LockClosedIcon } from '@heroicons/react/solid';
+import { doc, getDoc } from 'firebase/firestore';
 import Image from 'next/image';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { db } from '../libs/firebase';
 import Date from './Date';
 
 type Props = {
   title: string;
   href: string;
   user: string;
-  date: string;
+  date: number;
 };
 
 const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
+  const [writer, setWriter] = useState<any>();
+
+  useEffect(() => {
+    if (user) {
+      const ref = doc(db, `users/${user}`);
+      getDoc(ref).then((snap) => {
+        setWriter(snap.data() as any);
+      });
+    }
+  }, []);
+
   return (
     <div className="flex flex-col">
       <Link href={href}>
@@ -32,23 +45,25 @@ const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
               </p>
               <Link href="user/article/1">
                 <a>
-                  <div className="flex items-center">
-                    <div className="mt-2">
-                      <Image
-                        src="/images/village.png"
-                        alt="photo"
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
+                  {writer && (
+                    <div className="flex items-center">
+                      <div className="mt-2">
+                        <Image
+                          src={writer?.avatarUrl}
+                          alt="photo"
+                          width={32}
+                          height={32}
+                          className="rounded-full"
+                        />
+                      </div>
+                      <p className="text-base pl-2">{writer?.name}</p>
                     </div>
-                    <p className="text-base pl-2">{user}</p>
-                  </div>
+                  )}
                 </a>
               </Link>
               <div className="flex items-center">
                 <p className="text-base text-gray-400">
-                  <Date dateString={date} />
+                  <Date timestamp={date} />
                 </p>
                 <LockClosedIcon
                   className="h-6 w-6 ml-auto"

@@ -1,26 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
 import { BeakerIcon, CameraIcon } from '@heroicons/react/solid';
-import loadImage from 'blueimp-load-image';
-import parse from 'html-react-parser';
-import dynamic from 'next/dynamic';
-import React, { FormEvent, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import Heading from '../../../components/Heading';
-import Tiptap from '../../../components/Tiptap';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { useAuth } from '../../../libs/userContext';
+import { JSONContent } from '@tiptap/react';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { db, storage } from '../../../libs/firebase';
-import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
-import Modal from 'react-modal';
-import styles from '../../../styles/Modal.module.css';
-import Image from '@tiptap/extension-image';
 import { useRouter } from 'next/router';
-import { GetStaticPaths, GetStaticProps } from 'next';
-import { adminDB } from '../../../libs/firebase-admin';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import Modal from 'react-modal';
+import Heading from '../../../components/Heading';
+import Tiptap from '../../../components/Tiptap';
+import { db, storage } from '../../../libs/firebase';
+import { useAuth } from '../../../libs/userContext';
+import styles from '../../../styles/Modal.module.css';
+import { Article } from '../../../types/article';
 
 type Inputs = {
   title: string;
@@ -39,38 +33,41 @@ export default function Home() {
     watch,
     formState: { errors },
   } = useForm<Inputs>();
+  const [content, setContent] = useState<JSON>();
 
   const upload = (data) => {
-    const status = data.status;
-    const category = data.category;
-    const title = data.title;
-    const description = data.description;
-    const writerId = user.uid;
-    const writerAvater = user.avatarUrl;
-    const writerName = user.name;
-    const articleDoc = doc(
-      db,
-      // 本来は動的に記事idを取得
-      `articles/${articleId}`
-    );
+    const articleDoc = doc(db, `articles/${articleId}`);
 
-    setDoc(
-      articleDoc,
-      {
-        writerId,
-        writerAvater,
-        writerName,
-        status,
-        category,
-        title,
-        description,
-      },
-      {
-        merge: true,
-      }
-    ).then(() => {
+    const article: Article = {
+      id: articleId as string,
+      isPublic: data.status,
+      category: data.category,
+      title: data.title,
+      description: data.description,
+      writerId: user.uid,
+      createdAt: Date.now(),
+      content,
+    };
+
+    setDoc(articleDoc, article, {
+      merge: true,
+    }).then(() => {
       alert('保存完了');
     });
+    // // userドキュメントに反映
+    // const userDoc = doc(db, `users/${user.uid}/articleIds`);
+    // setDoc(
+    //   userDoc,
+    //   {
+    //     articleId,
+    //   },
+    //   {
+    //     merge: true,
+    //   }
+    // ).then(() => {
+    //   SetUploadImage(false);
+    //   alert('保存完了');
+    // });
   };
 
   const [title, setTitle] = useState('');
@@ -115,11 +112,10 @@ export default function Home() {
         const defaultPhoto = articleData.thumbnail;
         const defaultTitle = articleData.title;
         const defaultDescription = articleData.description;
-        const defaultBody = articleData.body;
+        const defaultBody = articleData.content;
 
         if (defaultBody) {
           setBody(defaultBody);
-          console.log(defaultBody);
         }
         if (defaultCategory) {
           setCategory(defaultCategory);
@@ -368,7 +364,11 @@ export default function Home() {
             </div>
 
             <div className="mt-6 ">
-              <Tiptap content={body} />
+              <Tiptap
+                onChange={(e: any) => setContent(e)}
+                content={body}
+                editable={true}
+              />
             </div>
             <div className="block lg:flex mt-6">
               <button className="mr-auto mt-3 block px-8 py-2 bg-red-600 hover:bg-pink-600 shadow rounded text-white font-bold">

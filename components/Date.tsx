@@ -1,12 +1,13 @@
 import { format, parseISO } from 'date-fns';
 
 type Props = {
-  dateString: string;
+  timestamp: number;
 };
 
-const Date = ({ dateString }: Props) => {
-  const date = parseISO(dateString);
-  return <time dateTime={dateString}>{format(date, 'yyyy.MM.dd')}</time>;
+const Date = ({ timestamp }: Props) => {
+  return (
+    <time dateTime={String(timestamp)}>{format(timestamp, 'yyyy.MM.dd')}</time>
+  );
 };
 
 export default Date;

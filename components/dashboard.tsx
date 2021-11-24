@@ -1,11 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
-const Dashboard = (select) => {
-  const dashboardMenu = [
+import { useRouter } from 'next/router';
+import { Tab } from '@headlessui/react';
+import { Fragment } from 'react';
+
+const Dashboard = ({ children }) => {
+  const router = useRouter();
+  const tabs = [
     {
       name: '記事管理',
       href: '/dashboard/articles',
-      serected: { select },
     },
     {
       name: 'マイリスト',
@@ -20,26 +24,35 @@ const Dashboard = (select) => {
       href: '/dashboard/stamp',
     },
   ];
+  function classNames(...classes) {
+    return classes.filter(Boolean).join(' ');
+  }
   return (
     <div>
-      <div className="">
-        <ul className="flex p-1 space-x-1 bg-blue-900/20 rounded-xl bg-blue-400 text-center">
-          {dashboardMenu.map((menu) => (
-            <li
-              className={
-                menu.serected
-                  ? 'w-full py-2 text-sm leading-5 font-medium bg-white rounded-lg text-blue-600'
-                  : 'w-full py-2 text-sm leading-5 font-medium hover:bg-blue-300 rounded-lg text-black'
-              }
-              key={menu.name}
-            >
-              <Link href={menu.href}>
-                <a className="block font-bold text-lg">{menu.name}</a>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <Tab.Group as="div" className="mt-4">
+        <div className="-mx-4 flex overflow-x-auto sm:mx-0">
+          <div className="flex-auto px-4 border-b border-gray-200 sm:px-0">
+            <Tab.List className="-mb-px flex space-x-10">
+              {tabs.map((tab) => (
+                <Link href={tab.href} key={tab.name}>
+                  <a>
+                    <Tab
+                      className={
+                        tab.href === router.pathname
+                          ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
+                      }
+                    >
+                      {tab.name}
+                    </Tab>
+                  </a>
+                </Link>
+              ))}
+            </Tab.List>
+          </div>
+        </div>
+      </Tab.Group>
+      {children}
     </div>
   );
 };

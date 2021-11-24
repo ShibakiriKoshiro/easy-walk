@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import style from '../styles/tiptap.module.scss';
 import Blockquote from '@tiptap/extension-blockquote';
@@ -21,7 +21,15 @@ import styles from '../styles/Modal.module.css';
 import { CameraIcon } from '@heroicons/react/solid';
 import { useRouter } from 'next/router';
 
-const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) => {
+const Tiptap = ({
+  editable = true,
+  content,
+  onChange,
+}: {
+  editable: boolean;
+  content: JSON;
+  onChange?: (data: JSONContent) => void;
+}) => {
   const { user } = useAuth();
   const router = useRouter();
   const { articleId } = router.query;
@@ -284,11 +292,17 @@ const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) =>
           'prose prose-sm sm:prose lg:prose xl:prose-xl focus:outline-none m-2',
       },
     },
+    onUpdate: (e) => {
+      // .contentにすると、type:docを記載しておく必要がある。
+      if (onChange) {
+        onChange(e.editor.getJSON());
+      }
+    },
   });
 
   useEffect(() => {
-    if (editor?.isActive) {
-      editor.commands?.setContent(content || '');
+    if (editor?.isActive && !editor.isDestroyed) {
+      editor.chain().focus().setContent(content).run();
     }
   }, [content, editor]);
 
@@ -339,7 +353,7 @@ const Tiptap = ({ editable = true, content = '<p>Hello World! 🌎️</p>' }) =>
       <div className={editable ? 'border' : ''}>
         <EditorContent className="w-full" editor={editor} />
       </div>
-      {editable && <button onClick={articleUpload}>JSON</button>}
+      {/* {editable && <button onClick={articleUpload}>JSON</button>} */}
     </>
   );
 };

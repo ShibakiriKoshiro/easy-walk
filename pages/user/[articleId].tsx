@@ -25,15 +25,26 @@ import { adminDB } from '../../libs/firebase-admin';
 import { useRouter } from 'next/router';
 import { GetStaticPaths, GetStaticProps } from 'next';
 
-const Article = ({
-  content = '',
-  title,
-  thumbnail,
-  writerId,
-  writerAvater,
-  writerName,
-}) => {
-  console.log(writerAvater);
+const Article = ({ content, title, thumbnail, writerId }) => {
+  const [avatar, setAvatar] = useState('');
+  const [name, setName] = useState('');
+  useEffect(() => {
+    const writerDoc = doc(
+      db,
+      // 本来はarticleIdが入ってから取得
+      `users/${writerId}`
+    );
+
+    getDoc(writerDoc).then((result) => {
+      const writerData = result.data();
+      console.log(writerData, '記事データ');
+      if (writerData) {
+        setAvatar(writerData.avatarUrl);
+        setName(writerData.name);
+      }
+    });
+    // 第二引数は、ロードする条件指定
+  }, [writerId]);
   return (
     <div className="container mt-16">
       <div className="block lg:flex">
@@ -89,9 +100,9 @@ const Article = ({
           <Link href="#">
             <a>
               <div className="flex items-center">
-                {writerAvater && (
+                {avatar && (
                   <img
-                    src={writerAvater}
+                    src={avatar}
                     width={64}
                     height={64}
                     alt="photo"
@@ -99,7 +110,7 @@ const Article = ({
                   />
                 )}
                 <div className="ml-3">
-                  <p className="font-bold text-xl">{writerName}</p>
+                  <p className="font-bold text-xl">{name}</p>
                   <p className="text-md text-gray-400">2021/9/28</p>
                 </div>
               </div>
@@ -140,12 +151,10 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      content: article?.body,
+      content: article?.content,
       title: article?.title,
       thumbnail: article?.thumbnail,
       writerId: article?.writerId,
-      writerAvater: article?.writerAvater,
-      writerName: article?.writerName,
     },
     revalidate: 3000,
     // will be passed to the page component as props

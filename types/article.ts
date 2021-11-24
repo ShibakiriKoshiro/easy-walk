@@ -2,9 +2,10 @@ export type Article = {
   id: string;
   title: string;
   description: string;
-  thumbnail: URL;
+  thumbnail?: URL;
   content: JSON;
   createdAt: number;
-  writer: any;
-  avatarUrl: URL;
+  writerId: string;
+  isPublic: boolean;
+  category: string;
 };
