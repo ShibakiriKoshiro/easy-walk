@@ -4,10 +4,11 @@ import Heading from '../../components/Heading';
 import { useRouter } from 'next/router';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../libs/firebase';
+import { query, where, getDocs } from 'firebase/firestore';
 import Dashboard from '../../components/dashboard';
 import { useAuth } from '../../libs/userContext';
 import { limit, orderBy } from 'firebase/firestore';
-import { query, where, getDocs } from 'firebase/firestore';
+
 import { Article } from '../../types/article';
 import Date from '../../components/Date';
 import Link from 'next/link';
@@ -69,7 +70,10 @@ const Management = () => {
             </button>
           </div>
           {article?.map((article) => (
-            <div key={article.id} className="border-b border-blue-gray-300">
+            <div
+              key={article.id}
+              className="border-b border-blue-gray-300 pt-2"
+            >
               <div className="flex justify-between">
                 <span className="font-bold hover:underline text-xl">
                   {article.title}

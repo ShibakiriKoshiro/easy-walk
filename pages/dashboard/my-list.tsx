@@ -1,27 +1,46 @@
 import { BeakerIcon } from '@heroicons/react/solid';
-import React from 'react';
 import ArticleCard from '../../components/ArticleCard';
 import Dashboard from '../../components/dashboard';
 import Heading from '../../components/Heading';
-import Article from '../../types/article-card';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../../libs/userContext';
+import { Article } from '../../types/article';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../libs/firebase';
+import { query, where, getDocs } from 'firebase/firestore';
 
-type Props = {
-  articles: Article[];
-};
-
-const MyList = ({ articles }: Props) => {
+const MyList = () => {
+  const { user } = useAuth();
+  const [article, setArticle] = useState<Article[]>();
+  useEffect(() => {
+    if (user?.uid) {
+      const articleRef = collection(db, 'articles');
+      const q = query(
+        articleRef,
+        where('favorite', 'array-contains', user.uid)
+      );
+      getDocs(q).then((snap) => {
+        const items = snap.docs.map((doc) => doc.data() as Article);
+        setArticle(items);
+      });
+    }
+  }, [user?.uid]);
+  console.log(article);
   return (
     <div className="w-full">
       <div className="container">
         <Dashboard>
           <div className="mt-6">
             <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
-              <ArticleCard
-                title="タイトル"
-                href="/article/1"
-                user="ユーザー名"
-                date="2021-10-10"
-              />
+              {article?.map((article) => (
+                <ArticleCard
+                  key={article.id}
+                  title={article.title}
+                  href={`/user/${article.id}`}
+                  user={article.writerId}
+                  date={article.createdAt}
+                />
+              ))}
             </div>
           </div>
         </Dashboard>
