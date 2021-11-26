@@ -1,13 +1,14 @@
 import React from 'react';
+import Date from './Date';
 
 const StampCard = ({ children, theme = 'primary' }) => {
   let themeColor: string;
   switch (theme) {
     case 'complete':
-      themeColor = 'bg-gray-100';
+      themeColor = 'bg-red-200';
       break;
     case 'incomplete':
-      themeColor = 'bg-red-200';
+      themeColor = 'bg-gray-100';
       break;
   }
 

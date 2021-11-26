@@ -25,10 +25,7 @@ const Management = () => {
   useEffect(() => {
     if (user?.uid) {
       const citiesRef = collection(db, 'articles');
-      const q = query(
-        citiesRef,
-        where('writerId', '==', 'clRtS9poLQWx0OtFiWuAEhCHrWm1')
-      );
+      const q = query(citiesRef, where('writerId', '==', user.uid));
       getDocs(q).then((snap) => {
         const items = snap.docs.map((doc) => doc.data() as Article);
         setArticle(items);
