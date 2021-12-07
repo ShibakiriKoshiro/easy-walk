@@ -25,8 +25,13 @@ type Inputs = {
 
 export default function Home() {
   const router = useRouter();
-  const { articleId } = router.query;
   const { user } = useAuth();
+  const { userId, articleId } = router.query;
+  if (userId != user?.uid) {
+    console.log('編集権限がありません。');
+    router.push('/');
+  }
+
   const {
     register,
     handleSubmit,
@@ -47,6 +52,7 @@ export default function Home() {
       writerId: user.uid,
       createdAt: Date.now(),
       content,
+      spot: '',
     };
 
     setDoc(articleDoc, article, {

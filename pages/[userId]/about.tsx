@@ -37,7 +37,7 @@ const About = () => {
             title="タイトル"
             href="/article/1"
             user="ユーザー名"
-            date="2021-10-10"
+            date={123456789}
           />
         </div>
       </div>

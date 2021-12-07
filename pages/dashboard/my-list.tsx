@@ -25,7 +25,7 @@ const MyList = () => {
       });
     }
   }, [user?.uid]);
-  console.log(article);
+
   return (
     <div className="w-full">
       <div className="container">

@@ -43,24 +43,20 @@ const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
               <p className="text-lg font-medium hover:underline flex-1">
                 {title}
               </p>
-              <Link href="user/article/1">
-                <a>
-                  {writer && (
-                    <div className="flex items-center">
-                      <div className="mt-2">
-                        <Image
-                          src={writer?.avatarUrl}
-                          alt="photo"
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                      </div>
-                      <p className="text-base pl-2">{writer?.name}</p>
-                    </div>
-                  )}
-                </a>
-              </Link>
+              {writer && (
+                <div className="flex items-center">
+                  <div className="mt-2">
+                    <Image
+                      src={writer?.avatarUrl}
+                      alt="photo"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                  </div>
+                  <p className="text-base pl-2">{writer?.name}</p>
+                </div>
+              )}
               <div className="flex items-center">
                 <p className="text-base text-gray-400">
                   <Date timestamp={date} />

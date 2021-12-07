@@ -5,6 +5,7 @@ import {
   QuestionMarkCircleIcon,
   ShareIcon,
   ThumbUpIcon,
+  UsersIcon,
 } from '@heroicons/react/solid';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,16 +19,43 @@ import TableHeader from '@tiptap/extension-table-header';
 import Blockquote from '@tiptap/extension-blockquote';
 // ImageはnextImageとかぶるためImgにした
 import Img from '@tiptap/extension-image';
-import { doc, getDoc, setDoc, collection } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from 'firebase/firestore';
 import { auth, db } from '../../libs/firebase';
 import Tiptap from '../../components/Tiptap';
 import { adminDB } from '../../libs/firebase-admin';
 import { useRouter } from 'next/router';
 import { GetStaticPaths, GetStaticProps } from 'next';
+import {
+  TwitterShareButton,
+  FacebookShareButton,
+  LineShareButton,
+  TwitterIcon,
+  FacebookIcon,
+  LineIcon,
+} from 'react-share';
+import { UserIcon } from '@heroicons/react/outline';
+import { useAuth } from '../../libs/userContext';
+import { query, where, getDocs } from 'firebase/firestore';
 
 const Article = ({ content, title, thumbnail, writerId }) => {
+  const { user } = useAuth();
+  const router = useRouter();
+  const { userId, articleId } = router.query;
+  if (userId != writerId) {
+    return <p>このページは存在しません</p>;
+  }
   const [avatar, setAvatar] = useState('');
+  const [like, setLike] = useState('');
   const [name, setName] = useState('');
+
   useEffect(() => {
     const writerDoc = doc(
       db,
@@ -37,14 +65,50 @@ const Article = ({ content, title, thumbnail, writerId }) => {
 
     getDoc(writerDoc).then((result) => {
       const writerData = result.data();
-      console.log(writerData, '記事データ');
       if (writerData) {
         setAvatar(writerData.avatarUrl);
         setName(writerData.name);
       }
     });
+
+    if (user?.uid) {
+      const articleDoc = doc(
+        db,
+        // 本来はarticleIdが入ってから取得
+        `articles/${articleId}`
+      );
+      getDoc(articleDoc).then((result) => {
+        const articleData = result.data();
+        const checkFavorite = articleData.favorite.find(
+          (favorite) => favorite === user.uid
+        );
+        //とれてる
+        if (checkFavorite) {
+          setLike(user.uid);
+        } else {
+          setLike(null);
+        }
+      });
+    }
+
     // 第二引数は、ロードする条件指定
-  }, [writerId]);
+  }, [writerId, user]);
+  const addFavorite = () => {
+    const newFavorite: any = doc(db, 'articles', `${articleId}`);
+    updateDoc(newFavorite, {
+      favorite: arrayUnion(`${user.uid}`),
+    });
+    setLike(user.uid);
+  };
+
+  const deleteFavorite = () => {
+    const deleteFavorite: any = doc(db, 'articles', `${articleId}`);
+    updateDoc(deleteFavorite, {
+      favorite: arrayRemove(user.uid),
+    });
+    setLike(null);
+  };
+
   return (
     <div className="container mt-16">
       <div className="block lg:flex">
@@ -57,13 +121,20 @@ const Article = ({ content, title, thumbnail, writerId }) => {
           )}
           <div className="flex items-center">
             {title && <h1 className="text-4xl mt-3">{title}</h1>}
-            <button className="ml-auto">
-              <ThumbUpIcon
-                className="h-10 w-10"
-                fill="none"
-                stroke="currentColor"
-              />
-            </button>
+
+            {like ? (
+              <button onClick={deleteFavorite} className="ml-auto">
+                <ThumbUpIcon className="h-10 w-10 text-blue-600" />
+              </button>
+            ) : (
+              <button onClick={addFavorite} className="ml-auto">
+                <ThumbUpIcon
+                  className="h-10 w-10"
+                  fill="none"
+                  stroke="currentColor"
+                />
+              </button>
+            )}
           </div>
           <div className="flex mt-6 mb-3 pb-2 border-b border-blue-gray-300 ">
             <a href="#">
@@ -86,16 +157,17 @@ const Article = ({ content, title, thumbnail, writerId }) => {
                 <p>足跡</p>
               </div>
             </button>
-            <a href="#" className="ml-12">
-              <div className="flex">
-                <ShareIcon
-                  className="h-6 w-6 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                />
-                <p>共有</p>
-              </div>
-            </a>
+            <TwitterShareButton url={`http://localhost:3000/user/${articleId}`}>
+              <TwitterIcon size={32} round={true} />
+            </TwitterShareButton>
+            <FacebookShareButton
+              url={`http://localhost:3000/user/${articleId}`}
+            >
+              <FacebookIcon size={32} round={true} />
+            </FacebookShareButton>
+            <LineShareButton url={`http://localhost:3000/user/${articleId}`}>
+              <LineIcon size={32} round={true} />
+            </LineShareButton>
           </div>
           <Link href="#">
             <a>

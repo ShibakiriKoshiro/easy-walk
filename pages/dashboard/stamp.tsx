@@ -24,26 +24,48 @@ const Stamp = () => {
       name: '慈光寺',
       visitedAt: null,
     },
+    {
+      id: '3',
+      name: '光明寺',
+      visitedAt: null,
+    },
   ];
-  const [stampData, setStampData] = useState<any[]>(stamps);
+  const [stampData, setStampData] = useState<any[]>();
 
   useEffect(() => {
     if (user?.uid) {
       const q = query(collection(db, `users/${user.uid}/stamps`));
       getDocs(q).then((snap) => {
         const items = snap.docs.map((doc) => doc.data());
-        const foundIds = items.map((item) => item.id);
-        console.log(foundIds, 'firestoreにあるデータのid');
-        const result: any = stamps.map((stamp) => stamp);
-        for (let i = 0; i < foundIds.length; i++) {
-          const found = result.find(({ id }) => id == foundIds[i]);
-          console.log(found, 'データを書き換えるリスト');
-          const data = items.find(({ id }) => id == foundIds[i]);
-          console.log(data, 'firestore書き換えるobj');
-          Object.assign(found, data);
-          console.log(found, '上書きしたデータ');
-          setStampData([...stampData, found]);
-        }
+
+        // const newStamps = stamps.map(stamp => {
+        //   const sameIdItem = items.find(item => item.id === stamp.id);
+
+        //   if(sameIdItem){
+        //     console.log(sameIdItem,"sameIdItem");
+
+        //     const result = { ...stamp,...sameIdItem };
+
+        //     console.log(result,"結合");
+        //     setStampData((stampData)=>[...stampData,result]);
+        //   }else{
+        //     return stamp
+        // }
+
+        const newStamps = stamps.map((stamp) => {
+          const sameIdItem = items.find((item) => item.id === stamp.id);
+
+          if (sameIdItem) {
+            return {
+              ...stamp,
+              ...sameIdItem,
+            };
+          } else {
+            return stamp;
+          }
+        });
+        console.log(newStamps, 'new');
+        setStampData(newStamps);
       });
     }
   }, [user?.uid]);
@@ -75,7 +97,7 @@ const Stamp = () => {
                   <div>
                     {stamp.visitedAt && (
                       <span>
-                        観光した日: <Date timestamp={stamp.visitedAt} />{' '}
+                        観光した日: <Date timestamp={stamp.visitedAt} />
                       </span>
                     )}
                   </div>
