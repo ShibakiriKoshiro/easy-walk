@@ -45,11 +45,11 @@ import { UserIcon } from '@heroicons/react/outline';
 import { useAuth } from '../../libs/userContext';
 import { query, where, getDocs } from 'firebase/firestore';
 
-const Article = ({ content, title, thumbnail, writerId }) => {
+const Article = ({ content, title, thumbnail, writerId, writer }) => {
   const { user } = useAuth();
   const router = useRouter();
   const { userId, articleId } = router.query;
-  if (userId != writerId) {
+  if (userId != writer) {
     return <p>このページは存在しません</p>;
   }
   const [avatar, setAvatar] = useState('');
@@ -57,11 +57,7 @@ const Article = ({ content, title, thumbnail, writerId }) => {
   const [name, setName] = useState('');
 
   useEffect(() => {
-    const writerDoc = doc(
-      db,
-      // 本来はarticleIdが入ってから取得
-      `users/${writerId}`
-    );
+    const writerDoc = doc(db, `users/${writerId}`);
 
     getDoc(writerDoc).then((result) => {
       const writerData = result.data();
@@ -72,21 +68,19 @@ const Article = ({ content, title, thumbnail, writerId }) => {
     });
 
     if (user?.uid) {
-      const articleDoc = doc(
-        db,
-        // 本来はarticleIdが入ってから取得
-        `articles/${articleId}`
-      );
+      const articleDoc = doc(db, `articles/${articleId}`);
       getDoc(articleDoc).then((result) => {
         const articleData = result.data();
-        const checkFavorite = articleData.favorite.find(
-          (favorite) => favorite === user.uid
-        );
-        //とれてる
-        if (checkFavorite) {
-          setLike(user.uid);
-        } else {
-          setLike(null);
+        if (articleData.favorite) {
+          const checkFavorite = articleData.favorite.find(
+            (favorite) => favorite === user.uid
+          );
+          //とれてる
+          if (checkFavorite) {
+            setLike(user.uid);
+          } else {
+            setLike(null);
+          }
         }
       });
     }
@@ -94,11 +88,15 @@ const Article = ({ content, title, thumbnail, writerId }) => {
     // 第二引数は、ロードする条件指定
   }, [writerId, user]);
   const addFavorite = () => {
-    const newFavorite: any = doc(db, 'articles', `${articleId}`);
-    updateDoc(newFavorite, {
-      favorite: arrayUnion(`${user.uid}`),
-    });
-    setLike(user.uid);
+    if (user) {
+      const newFavorite: any = doc(db, 'articles', `${articleId}`);
+      updateDoc(newFavorite, {
+        favorite: arrayUnion(`${user.uid}`),
+      });
+      setLike(user.uid);
+    } else {
+      router.push('/signup');
+    }
   };
 
   const deleteFavorite = () => {
@@ -121,7 +119,6 @@ const Article = ({ content, title, thumbnail, writerId }) => {
           )}
           <div className="flex items-center">
             {title && <h1 className="text-4xl mt-3">{title}</h1>}
-
             {like ? (
               <button onClick={deleteFavorite} className="ml-auto">
                 <ThumbUpIcon className="h-10 w-10 text-blue-600" />
@@ -157,15 +154,19 @@ const Article = ({ content, title, thumbnail, writerId }) => {
                 <p>足跡</p>
               </div>
             </button>
-            <TwitterShareButton url={`http://localhost:3000/user/${articleId}`}>
+            <TwitterShareButton
+              url={`http://localhost:3000/${userId}/${articleId}`}
+            >
               <TwitterIcon size={32} round={true} />
             </TwitterShareButton>
             <FacebookShareButton
-              url={`http://localhost:3000/user/${articleId}`}
+              url={`http://localhost:3000/${userId}/${articleId}`}
             >
               <FacebookIcon size={32} round={true} />
             </FacebookShareButton>
-            <LineShareButton url={`http://localhost:3000/user/${articleId}`}>
+            <LineShareButton
+              url={`http://localhost:3000/${userId}/${articleId}`}
+            >
               <LineIcon size={32} round={true} />
             </LineShareButton>
           </div>
@@ -227,6 +228,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       title: article?.title,
       thumbnail: article?.thumbnail,
       writerId: article?.writerId,
+      writer: article?.writer,
     },
     revalidate: 3000,
     // will be passed to the page component as props

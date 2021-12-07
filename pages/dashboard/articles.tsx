@@ -17,9 +17,9 @@ const Management = () => {
   const router = useRouter();
   const { user } = useAuth();
 
-  const toEditPage = () => {
-    const { id } = doc(collection(db, 'articles'));
-    router.push(`/user/${id}/edit`);
+  const toEditPage = async () => {
+    const { id } = await doc(collection(db, 'articles'));
+    router.push(`/${user.id}/${id}/edit`);
   };
   const [article, setArticle] = useState<Article[]>();
   useEffect(() => {
@@ -75,7 +75,7 @@ const Management = () => {
                 <span className="font-bold hover:underline text-xl">
                   {article.title}
                 </span>
-                <Link href={`/user/${article.id}/edit`}>
+                <Link href={`/${article.writer}/${article.id}/edit`}>
                   <a>
                     <PencilIcon className="h-6 w-6" />
                   </a>

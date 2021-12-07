@@ -28,6 +28,7 @@ import {
   ShieldCheckIcon,
   ViewGridIcon,
 } from '@heroicons/react/outline';
+import { signOut } from 'firebase/auth';
 
 const solutions = [
   {
@@ -71,12 +72,14 @@ const Layouts: FC = (props: { children: ReactNode }) => {
   };
 
   const logOut = async () => {
-    try {
-      await auth.signOut();
-      router.push('/signin');
-    } catch (error) {
-      alert(error.message);
-    }
+    signOut(auth)
+      .then(() => {
+        // Sign-out successful.
+        console.log('ログアウト');
+      })
+      .catch((error) => {
+        // An error happened.
+      });
   };
   useEffect(() => {
     if (user?.uid) {

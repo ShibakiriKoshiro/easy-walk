@@ -36,7 +36,7 @@ const MyList = () => {
                 <ArticleCard
                   key={article.id}
                   title={article.title}
-                  href={`/user/${article.id}`}
+                  href={`/${article.writer}/${article.id}`}
                   user={article.writerId}
                   date={article.createdAt}
                 />

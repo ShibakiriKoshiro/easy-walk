@@ -9,6 +9,7 @@ import { auth, db } from '../libs/firebase';
 
 type Inputs = {
   name: string;
+  id: string;
   email: string;
   password: string;
 };
@@ -38,6 +39,7 @@ const Signup: FC = () => {
         try {
           const docRef = await setDoc(doc(db, 'users', auth.currentUser.uid), {
             uid: auth.currentUser.uid,
+            id: data.id,
             name: data.name,
             email: email,
             createdAt: auth.currentUser.metadata.creationTime,
@@ -63,7 +65,13 @@ const Signup: FC = () => {
         <p className="text-center pt-8 font-bold text-lg">サインアップ</p>
         <form onSubmit={handleSubmit(createUser)}>
           <input
-            placeholder="ユーザ名"
+            placeholder="ユーザーID　※半角英字のみ"
+            className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
+            defaultValue=""
+            {...register('id')}
+          />
+          <input
+            placeholder="ユーザー名"
             className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
             defaultValue=""
             {...register('name')}

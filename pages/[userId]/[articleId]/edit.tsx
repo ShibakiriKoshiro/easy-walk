@@ -27,10 +27,6 @@ export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
   const { userId, articleId } = router.query;
-  if (userId != user?.uid) {
-    console.log('編集権限がありません。');
-    router.push('/');
-  }
 
   const {
     register,
@@ -50,6 +46,7 @@ export default function Home() {
       title: data.title,
       description: data.description,
       writerId: user.uid,
+      writer: user.id,
       createdAt: Date.now(),
       content,
       spot: '',
@@ -141,7 +138,11 @@ export default function Home() {
       }
     });
     // 第二引数は、ロードする条件指定
-  }, [articleId]);
+    if (userId != user?.uid) {
+      console.log('編集権限がありません。');
+      // router.push('/');
+    }
+  }, [articleId, user?.uid]);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 

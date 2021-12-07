@@ -10,4 +10,5 @@ export type Article = {
   category: string;
   // 編集部(サイト運営者の記事のみ)
   spot: string;
+  writer: string;
 };
