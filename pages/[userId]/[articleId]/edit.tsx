@@ -21,6 +21,11 @@ type Inputs = {
   description: string;
   category: string;
   status: 'public' | 'private';
+  spot: string;
+  spotId: string | null;
+  spotName: string | null;
+  spotArticleId: string | null;
+  spotCategory: string | null;
 };
 
 export default function Home() {
@@ -38,7 +43,6 @@ export default function Home() {
 
   const upload = (data) => {
     const articleDoc = doc(db, `articles/${articleId}`);
-
     const article: Article = {
       id: articleId as string,
       isPublic: data.status,
@@ -49,7 +53,10 @@ export default function Home() {
       writer: user.id,
       createdAt: Date.now(),
       content,
-      spot: '',
+      spotId: data.spotId,
+      spotName: data.spotName,
+      spotArticleId: `${articleId}`,
+      spotCategory: data.spotCategory,
     };
 
     setDoc(articleDoc, article, {
@@ -82,6 +89,11 @@ export default function Home() {
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
+  const [spotId, setSpotId] = useState('');
+  const [spotName, setSpotName] = useState('');
+  const [spotArticleId, setSpotArticleId] = useState('');
+  const [spotCategory, setSpotCategory] = useState('');
+
   const categories = ['観光', '特産品', '体験'];
   const [body, setBody] = useState();
   const [status, setStatus] = useState();
@@ -91,6 +103,15 @@ export default function Home() {
   };
   const handleCategory = (event) => {
     setCategory(event.target.value);
+  };
+  const handleSpotId = (event) => {
+    setSpotId(event.target.value);
+  };
+  const handleSpotName = (event) => {
+    setSpotName(event.target.value);
+  };
+  const handleSpotCategory = (event) => {
+    setSpotCategory(event.target.value);
   };
 
   //　記事idを取得後記事の中身をセット
@@ -116,6 +137,9 @@ export default function Home() {
         const defaultTitle = articleData.title;
         const defaultDescription = articleData.description;
         const defaultBody = articleData.content;
+        const defaultSpotId = articleData.spotId;
+        const defaultSpotName = articleData.spotName;
+        const defaultSpotCategory = articleData.spotCategory;
 
         if (defaultBody) {
           setBody(defaultBody);
@@ -134,6 +158,15 @@ export default function Home() {
         }
         if (defaultPhoto) {
           setPreview(defaultPhoto);
+        }
+        if (defaultSpotId) {
+          setSpotId(defaultSpotId);
+        }
+        if (defaultSpotName) {
+          setSpotName(defaultSpotName);
+        }
+        if (defaultSpotCategory) {
+          setSpotCategory(defaultSpotCategory);
         }
       }
     });
@@ -292,6 +325,34 @@ export default function Home() {
               value={description}
             />
             <p className="text-right">{description.length} /120文字</p>
+            {user?.id == 'article' && (
+              <>
+                <input
+                  placeholder="スポットID"
+                  className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
+                  {...register('spotId', { required: true })}
+                  onChange={(event) => handleSpotId(event)}
+                  type={'text'}
+                  value={spotId}
+                />
+                <input
+                  placeholder="スポット名"
+                  className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
+                  {...register('spotName', { required: true })}
+                  onChange={(event) => handleSpotName(event)}
+                  type={'text'}
+                  value={spotName}
+                />
+                <input
+                  placeholder="スポットカテゴリ"
+                  className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
+                  {...register('spotCategory', { required: true })}
+                  onChange={(event) => handleSpotCategory(event)}
+                  type={'text'}
+                  value={spotCategory}
+                />
+              </>
+            )}
             <div className="mt-6 flex">
               <div className="mt-6 flex">
                 {preview ? (

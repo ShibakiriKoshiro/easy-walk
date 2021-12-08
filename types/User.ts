@@ -4,6 +4,8 @@ export type User = {
   name: string;
   email: string;
   createdAt: number;
-  avatarUrl: URL;
+  avatarUrl: string;
   articleIds: JSON;
+  link: string;
+  descriotion: string;
 };

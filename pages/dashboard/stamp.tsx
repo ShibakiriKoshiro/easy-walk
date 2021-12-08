@@ -10,50 +10,30 @@ import { auth, db } from '../../libs/firebase';
 import { query, where, getDocs } from 'firebase/firestore';
 import { startOfMonth } from 'date-fns';
 import Date from '../../components/Date';
+import { Stamp } from '../../types/stamp';
 
-const Stamp = () => {
+const StampFile = () => {
   const { user } = useAuth();
-  const stamps = [
-    {
-      id: '1',
-      name: '千光寺',
-      visitedAt: null,
-    },
-    {
-      id: '2',
-      name: '慈光寺',
-      visitedAt: null,
-    },
-    {
-      id: '3',
-      name: '光明寺',
-      visitedAt: null,
-    },
-  ];
+  const [stamps, setStamps] = useState<Stamp[]>();
   const [stampData, setStampData] = useState<any[]>();
-
   useEffect(() => {
     if (user?.uid) {
+      const articleRef = collection(db, 'articles');
+      const q = query(articleRef, where('spotCategory', '==', 'お寺'));
+      getDocs(q).then((snap) => {
+        const items = snap.docs.map((doc) => doc.data() as Stamp);
+        setStamps(() => items);
+      });
+    }
+  }, [user?.uid]);
+
+  useEffect(() => {
+    if (user?.uid && stamps) {
       const q = query(collection(db, `users/${user.uid}/stamps`));
       getDocs(q).then((snap) => {
         const items = snap.docs.map((doc) => doc.data());
-
-        // const newStamps = stamps.map(stamp => {
-        //   const sameIdItem = items.find(item => item.id === stamp.id);
-
-        //   if(sameIdItem){
-        //     console.log(sameIdItem,"sameIdItem");
-
-        //     const result = { ...stamp,...sameIdItem };
-
-        //     console.log(result,"結合");
-        //     setStampData((stampData)=>[...stampData,result]);
-        //   }else{
-        //     return stamp
-        // }
-
         const newStamps = stamps.map((stamp) => {
-          const sameIdItem = items.find((item) => item.id === stamp.id);
+          const sameIdItem = items.find((item) => item.spotId === stamp.spotId);
 
           if (sameIdItem) {
             return {
@@ -64,11 +44,11 @@ const Stamp = () => {
             return stamp;
           }
         });
-        console.log(newStamps, 'new');
         setStampData(newStamps);
+        console.log(newStamps, 'new');
       });
     }
-  }, [user?.uid]);
+  }, [user?.uid, stamps?.length]);
 
   // const [article, setArticle] = useState<Article[]>();
   // useEffect(() => {
@@ -90,10 +70,10 @@ const Stamp = () => {
             <div className="mt-6 grid grid-cols-6 gap-4">
               {stampData?.map((stamp) => (
                 <StampCard
-                  key={stamp.name}
+                  key={stamp.spotId}
                   theme={stamp.visitedAt ? 'complete' : 'incomplete'}
                 >
-                  {stamp.name}
+                  {stamp.spotName}
                   <div>
                     {stamp.visitedAt && (
                       <span>
@@ -111,4 +91,4 @@ const Stamp = () => {
   );
 };
 
-export default Stamp;
+export default StampFile;

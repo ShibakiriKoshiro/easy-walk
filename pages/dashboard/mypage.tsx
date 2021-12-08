@@ -3,7 +3,7 @@ import { CameraIcon } from '@heroicons/react/solid';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { db, storage } from '../../libs/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import {
   getDownloadURL,
   ref,
@@ -17,6 +17,7 @@ import { useAuth } from '../../libs/userContext';
 import styles from '../../styles/Modal.module.css';
 import Modal from 'react-modal';
 import Dashboard from '../../components/dashboard';
+import { deleteUser, getAuth } from 'firebase/auth';
 type Inputs = {
   userName: string;
   description: string;
@@ -25,6 +26,8 @@ type Inputs = {
 
 const Mypage = () => {
   const { user } = useAuth();
+  const auth = getAuth();
+  const authUser = auth.currentUser;
   const {
     register,
     handleSubmit,
@@ -121,12 +124,12 @@ const Mypage = () => {
   };
 
   // プレビューされている内容をアップロード
-  const uploadAvatar = async () => {
+  const uploadAvatar = async (croppedImage) => {
     // 保存先のRefを取得
     const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
 
     // 画像アップロード
-    await uploadString(storageRef, preview as string, 'data_url');
+    await uploadString(storageRef, croppedImage as string, 'data_url');
 
     // アップロードした画像を表示するためのURLを取得
     const avatarUrl = await getDownloadURL(storageRef);
@@ -147,10 +150,8 @@ const Mypage = () => {
       alert('保存完了');
     });
   };
+
   const upload = (data) => {
-    if (uploadImage) {
-      uploadAvatar();
-    }
     const name = data.userName;
     const description = data.description;
     const link = data.link;
@@ -174,6 +175,17 @@ const Mypage = () => {
       SetUploadImage(false);
       alert('保存完了');
     });
+  };
+  const deleteU = () => {
+    deleteUser(authUser)
+      .then(async () => {
+        console.log('消去');
+        await deleteDoc(doc(db, 'users', user.uid));
+      })
+      .catch((error) => {
+        // An error ocurred
+        // ...
+      });
   };
 
   return (
@@ -250,7 +262,12 @@ const Mypage = () => {
                         .toDataURL('image/jpeg');
 
                       // プレビューステートにセット
+
+                      //　全部走り終わるまでsetされない
+                      // 要修正
                       setPreview(croppedImage);
+                      uploadAvatar(croppedImage);
+
                       // ダイヤログを閉じるためにクロップターゲットを空にする
                       setTargetFile(null);
                       SetUploadImage(true);
@@ -317,6 +334,12 @@ const Mypage = () => {
           <p className="text-gray-600">
             有料プランに加入している場合、退会すると全ての定期購入が停止します。
           </p>
+          <button
+            onClick={deleteU}
+            className="block ml-auto mt-6 px-8 py-2 bg-red-600 hover:bg-indigo-600 shadow rounded text-white font-bold"
+          >
+            退会する
+          </button>
           {/* <form onSubmit={handleSubmit(onSubmit)}>
           <input
             placeholder="ユーザー名"

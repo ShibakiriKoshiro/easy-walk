@@ -1,7 +1,7 @@
 export type Stamp = {
-  id: string;
-  name: string;
-  visitedAt: number;
-  articleId: string;
-  category: string;
+  spotId: string;
+  spotName: string;
+  visitedAt: number | null;
+  spotArticleId: string;
+  spotCategory: string;
 };

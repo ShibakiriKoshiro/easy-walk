@@ -27,6 +27,8 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
+  addDoc,
+  deleteDoc,
 } from 'firebase/firestore';
 import { auth, db } from '../../libs/firebase';
 import Tiptap from '../../components/Tiptap';
@@ -44,8 +46,27 @@ import {
 import { UserIcon } from '@heroicons/react/outline';
 import { useAuth } from '../../libs/userContext';
 import { query, where, getDocs } from 'firebase/firestore';
+import { Stamp } from '../../types/stamp';
 
-const Article = ({ content, title, thumbnail, writerId, writer }) => {
+const Article = ({
+  content,
+  title,
+  thumbnail,
+  writerId,
+  writer,
+  spotName,
+  spotId,
+  spotCategory,
+}: {
+  spotCategory: string | null;
+  spotId: string | null;
+  spotName: string | null;
+  writer: string;
+  writerId: string;
+  thumbnail: string | null;
+  title: string;
+  content: JSON;
+}) => {
   const { user } = useAuth();
   const router = useRouter();
   const { userId, articleId } = router.query;
@@ -53,8 +74,11 @@ const Article = ({ content, title, thumbnail, writerId, writer }) => {
     return <p>このページは存在しません</p>;
   }
   const [avatar, setAvatar] = useState('');
-  const [like, setLike] = useState('');
   const [name, setName] = useState('');
+  // いいね機能
+  const [like, setLike] = useState('');
+  // スタンプ機能
+  const [go, setGo] = useState<boolean>();
 
   useEffect(() => {
     const writerDoc = doc(db, `users/${writerId}`);
@@ -84,6 +108,18 @@ const Article = ({ content, title, thumbnail, writerId, writer }) => {
         }
       });
     }
+    if (user?.uid) {
+      const stampRef = collection(db, `users/${user.uid}/stamps`);
+      const q = query(stampRef, where('spotName', '==', spotName));
+      getDocs(q).then((snap) => {
+        const items = snap.docs.map((doc) => doc.data());
+        if (items[0]?.visitedAt) {
+          setGo(true);
+        } else {
+          setGo(false);
+        }
+      });
+    }
 
     // 第二引数は、ロードする条件指定
   }, [writerId, user]);
@@ -95,16 +131,47 @@ const Article = ({ content, title, thumbnail, writerId, writer }) => {
       });
       setLike(user.uid);
     } else {
-      router.push('/signup');
+      // router.push('/signup');
     }
   };
 
   const deleteFavorite = () => {
-    const deleteFavorite: any = doc(db, 'articles', `${articleId}`);
-    updateDoc(deleteFavorite, {
-      favorite: arrayRemove(user.uid),
+    if (user) {
+      const deleteFavorite: any = doc(db, 'articles', `${articleId}`);
+      updateDoc(deleteFavorite, {
+        favorite: arrayRemove(user.uid),
+      });
+      setLike(null);
+    }
+  };
+
+  const addStamp = () => {
+    const stampRef = collection(db, `users/${user.uid}/stamps`);
+    const q = query(stampRef, where('spotName', '==', spotName));
+    getDocs(q).then((snap) => {
+      const items = snap.docs.map((doc) => doc.data());
+      // 2回目なら
+      if (items[0]?.name) {
+        setGo(true);
+      } else {
+        // 初回なら
+        setDoc(doc(db, `users/${user.uid}/stamps`, spotId), {
+          spotId: spotId,
+          spotName: spotName,
+          spotCategory: spotCategory,
+          spotArticleId: articleId,
+          visitedAt: Date.now(),
+        });
+        setGo(true);
+      }
     });
-    setLike(null);
+  };
+
+  const deleteStamp = async () => {
+    if (user) {
+      await deleteDoc(doc(db, `users/${user.uid}/stamps`, spotId));
+      setGo(false);
+    }
   };
 
   return (
@@ -144,16 +211,28 @@ const Article = ({ content, title, thumbnail, writerId, writer }) => {
                 <p>質問する</p>
               </div>
             </a>
-            <button className="ml-12">
-              <div className="flex">
-                <FlagIcon
-                  className="h-6 w-6 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                />
-                <p>足跡</p>
-              </div>
-            </button>
+            {go ? (
+              <button className="ml-12">
+                <div className="flex">
+                  <FlagIcon
+                    onClick={deleteStamp}
+                    className="h-6 w-6 mr-2 text-yellow-300"
+                  />
+                  <p>スタンプ</p>
+                </div>
+              </button>
+            ) : (
+              <button onClick={addStamp} className="ml-12">
+                <div className="flex">
+                  <FlagIcon
+                    className="h-6 w-6 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                  />
+                  <p>スタンプ</p>
+                </div>
+              </button>
+            )}
             <TwitterShareButton
               url={`http://localhost:3000/${userId}/${articleId}`}
             >
@@ -229,6 +308,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
       thumbnail: article?.thumbnail,
       writerId: article?.writerId,
       writer: article?.writer,
+      spotName: article?.spotName,
+      spotId: article?.spotId,
+      spotCategory: article?.spotCategory,
     },
     revalidate: 3000,
     // will be passed to the page component as props

@@ -18,8 +18,10 @@ const Management = () => {
   const { user } = useAuth();
 
   const toEditPage = async () => {
-    const { id } = await doc(collection(db, 'articles'));
-    router.push(`/${user.id}/${id}/edit`);
+    if (user.uid) {
+      const { id } = await doc(collection(db, 'articles'));
+      router.push(`/${user.id}/${id}/edit`);
+    }
   };
   const [article, setArticle] = useState<Article[]>();
   useEffect(() => {
