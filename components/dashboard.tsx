@@ -23,36 +23,42 @@ const Dashboard = ({ children }) => {
       name: 'スタンプ',
       href: '/dashboard/stamp',
     },
+    {
+      name: 'チケット',
+      href: '/dashboard/ticket',
+    },
   ];
   function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
   }
   return (
-    <div>
-      <Tab.Group as="div" className="mt-4">
-        <div className="-mx-4 flex overflow-x-auto sm:mx-0">
-          <div className="flex-auto px-4 border-b border-gray-200 sm:px-0">
-            <Tab.List className="-mb-px flex space-x-10">
-              {tabs.map((tab) => (
-                <Link href={tab.href} key={tab.name}>
-                  <a>
-                    <Tab
-                      className={
-                        tab.href === router.pathname
-                          ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
-                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
-                      }
-                    >
-                      {tab.name}
-                    </Tab>
-                  </a>
-                </Link>
-              ))}
-            </Tab.List>
+    <div className="w-full">
+      <div className="container">
+        <Tab.Group as="div" className="mt-6">
+          <div className="-mx-4 flex overflow-x-auto sm:mx-0">
+            <div className="flex-auto px-4 border-b border-gray-200 sm:px-0">
+              <Tab.List className="-mb-px flex space-x-10">
+                {tabs.map((tab) => (
+                  <Link href={tab.href} key={tab.name}>
+                    <a>
+                      <Tab
+                        className={
+                          tab.href === router.pathname
+                            ? 'border-indigo-500 text-indigo-600 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
+                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-6 border-b-2 font-medium text-sm'
+                        }
+                      >
+                        {tab.name}
+                      </Tab>
+                    </a>
+                  </Link>
+                ))}
+              </Tab.List>
+            </div>
           </div>
-        </div>
-      </Tab.Group>
-      {children}
+        </Tab.Group>
+        <div className="w-full my-6">{children}</div>
+      </div>
     </div>
   );
 };

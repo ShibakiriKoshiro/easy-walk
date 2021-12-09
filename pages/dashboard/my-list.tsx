@@ -27,25 +27,21 @@ const MyList = () => {
   }, [user?.uid]);
 
   return (
-    <div className="w-full">
-      <div className="container">
-        <Dashboard>
-          <div className="mt-6">
-            <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
-              {article?.map((article) => (
-                <ArticleCard
-                  key={article.id}
-                  title={article.title}
-                  href={`/${article.writer}/${article.id}`}
-                  user={article.writerId}
-                  date={article.createdAt}
-                />
-              ))}
-            </div>
-          </div>
-        </Dashboard>
+    <Dashboard>
+      <div className="mt-6">
+        <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
+          {article?.map((article) => (
+            <ArticleCard
+              key={article.id}
+              title={article.title}
+              href={`/${article.writer}/${article.id}`}
+              user={article.writerId}
+              date={article.createdAt}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </Dashboard>
   );
 };
 

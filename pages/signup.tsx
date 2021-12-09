@@ -1,4 +1,5 @@
 import { doc, setDoc } from '@firebase/firestore';
+import { loadStripe } from '@stripe/stripe-js';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/router';
 import React, { FC, useEffect } from 'react';
@@ -13,6 +14,8 @@ type Inputs = {
   email: string;
   password: string;
 };
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const Signup: FC = () => {
   const router = useRouter();
@@ -37,12 +40,24 @@ const Signup: FC = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then(async (userCredential) => {
         try {
+          //　ユーザードキュメントに反映
           const docRef = await setDoc(doc(db, 'users', auth.currentUser.uid), {
             uid: auth.currentUser.uid,
             id: data.id,
             name: data.name,
             email: email,
             createdAt: auth.currentUser.metadata.creationTime,
+          });
+
+          // stripeIdを作成&Customersドキュメントに反映
+          const response = await fetch(
+            `http://localhost:3000/api/create-customer`
+          );
+          const customer = await response.json();
+          const customerDoc = await doc(db, 'customers', customer.customer.id);
+          await setDoc(customerDoc, {
+            uid: auth.currentUser.uid,
+            customerId: customer.customer.id,
           });
         } catch (e) {
           console.error('Error adding document: ', e);

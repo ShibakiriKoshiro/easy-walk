@@ -43,27 +43,47 @@ export default function Home() {
 
   const upload = (data) => {
     const articleDoc = doc(db, `articles/${articleId}`);
-    const article: Article = {
-      id: articleId as string,
-      isPublic: data.status,
-      category: data.category,
-      title: data.title,
-      description: data.description,
-      writerId: user.uid,
-      writer: user.id,
-      createdAt: Date.now(),
-      content,
-      spotId: data.spotId,
-      spotName: data.spotName,
-      spotArticleId: `${articleId}`,
-      spotCategory: data.spotCategory,
-    };
+    if (user.id == 'article') {
+      const article: Article = {
+        id: articleId as string,
+        isPublic: data.status,
+        category: data.category,
+        title: data.title,
+        description: data.description,
+        writerId: user.uid,
+        writer: user.id,
+        createdAt: Date.now(),
+        content,
+        spotId: data?.spotId,
+        spotName: data?.spotName,
+        spotArticleId: `${articleId}`,
+        spotCategory: data?.spotCategory,
+      };
 
-    setDoc(articleDoc, article, {
-      merge: true,
-    }).then(() => {
-      alert('保存完了');
-    });
+      setDoc(articleDoc, article, {
+        merge: true,
+      }).then(() => {
+        alert('保存完了');
+      });
+    } else {
+      const article = {
+        id: articleId as string,
+        isPublic: data.status,
+        category: data.category,
+        title: data.title,
+        description: data.description,
+        writerId: user.uid,
+        writer: user.id,
+        createdAt: Date.now(),
+        content,
+      };
+
+      setDoc(articleDoc, article, {
+        merge: true,
+      }).then(() => {
+        alert('保存完了');
+      });
+    }
     // // userドキュメントに反映
     // const userDoc = doc(db, `users/${user.uid}/articleIds`);
     // setDoc(

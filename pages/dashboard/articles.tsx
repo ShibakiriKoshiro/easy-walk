@@ -53,54 +53,43 @@ const Management = () => {
   //   }
   // }, [user?.uid]);
   return (
-    <div>
-      {/* <Heading>
-        <BeakerIcon className="h-6 w-6 mr-6" />
-        <p className="text-xl font-bold">見出しです！</p>
-      </Heading> */}
-      <div className="container">
-        <Dashboard>
-          <div className="w-full text-right my-3">
-            <button
-              onClick={toEditPage}
-              className="rounded p-2 bg-blue-500 shadow text-white"
-            >
-              投稿する
-            </button>
-          </div>
-          {article?.map((article) => (
-            <div
-              key={article.id}
-              className="border-b border-blue-gray-300 pt-2"
-            >
-              <div className="flex justify-between">
-                <span className="font-bold hover:underline text-xl">
-                  {article.title}
-                </span>
-                <Link href={`/${article.writer}/${article.id}/edit`}>
-                  <a>
-                    <PencilIcon className="h-6 w-6" />
-                  </a>
-                </Link>
-              </div>
-              <div className="flex items-center my-2">
-                <div className="">
-                  <p className="inline border-blue-600 text-blue-600 rounded border px-2 py-1 mr-3">
-                    {article.isPublic ? '公開' : '非公開'}
-                  </p>
-                  <p className="inline text-gray-400">
-                    <Date timestamp={article.createdAt} />
-                  </p>
-                </div>
-                <div className="ml-auto">
-                  <p>1200文字</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </Dashboard>
+    <Dashboard>
+      <div className="w-full text-right my-3">
+        <button
+          onClick={toEditPage}
+          className="rounded p-2 bg-blue-500 shadow text-white"
+        >
+          投稿する
+        </button>
       </div>
-    </div>
+      {article?.map((article) => (
+        <div key={article.id} className="border-b border-blue-gray-300 pt-2">
+          <div className="flex justify-between">
+            <span className="font-bold hover:underline text-xl">
+              {article.title}
+            </span>
+            <Link href={`/${article.writer}/${article.id}/edit`}>
+              <a>
+                <PencilIcon className="h-6 w-6" />
+              </a>
+            </Link>
+          </div>
+          <div className="flex items-center my-2">
+            <div className="">
+              <p className="inline border-blue-600 text-blue-600 rounded border px-2 py-1 mr-3">
+                {article.isPublic ? '公開' : '非公開'}
+              </p>
+              <p className="inline text-gray-400">
+                <Date timestamp={article.createdAt} />
+              </p>
+            </div>
+            <div className="ml-auto">
+              <p>1200文字</p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </Dashboard>
   );
 };
 

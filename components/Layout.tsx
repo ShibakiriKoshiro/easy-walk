@@ -26,6 +26,7 @@ import {
   PlayIcon,
   RefreshIcon,
   ShieldCheckIcon,
+  TicketIcon,
   ViewGridIcon,
 } from '@heroicons/react/outline';
 import { signOut } from 'firebase/auth';
@@ -50,6 +51,11 @@ const solutions = [
     name: 'スタンプ',
     href: '/dashboard/stamp',
     icon: GlobeIcon,
+  },
+  {
+    name: 'チケット',
+    href: '/dashboard/ticket',
+    icon: TicketIcon,
   },
 ];
 const callsToAction = [

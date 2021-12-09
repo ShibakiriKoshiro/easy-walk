@@ -61,11 +61,11 @@ const Article = ({
   spotCategory: string | null;
   spotId: string | null;
   spotName: string | null;
-  writer: string;
-  writerId: string;
+  writer: string | null;
+  writerId: string | null;
   thumbnail: string | null;
-  title: string;
-  content: JSON;
+  title: string | null;
+  content: JSON | null;
 }) => {
   const { user } = useAuth();
   const router = useRouter();
@@ -108,7 +108,7 @@ const Article = ({
         }
       });
     }
-    if (user?.uid) {
+    if (user?.uid && user?.id == 'article') {
       const stampRef = collection(db, `users/${user.uid}/stamps`);
       const q = query(stampRef, where('spotName', '==', spotName));
       getDocs(q).then((snap) => {
@@ -249,7 +249,7 @@ const Article = ({
               <LineIcon size={32} round={true} />
             </LineShareButton>
           </div>
-          <Link href="#">
+          <Link href={`http://localhost:3000/${userId}/`}>
             <a>
               <div className="flex items-center">
                 {avatar && (
@@ -301,20 +301,34 @@ export const getStaticProps: GetStaticProps = async (context) => {
   const snap = await adminDB.doc(`articles/${context.params.articleId}`).get();
   const article = snap.data();
 
-  return {
-    props: {
-      content: article?.content,
-      title: article?.title,
-      thumbnail: article?.thumbnail,
-      writerId: article?.writerId,
-      writer: article?.writer,
-      spotName: article?.spotName,
-      spotId: article?.spotId,
-      spotCategory: article?.spotCategory,
-    },
-    revalidate: 3000,
-    // will be passed to the page component as props
-  };
+  if (article?.writer == 'article') {
+    return {
+      props: {
+        content: article?.content,
+        title: article?.title,
+        thumbnail: article?.thumbnail,
+        writerId: article?.writerId,
+        writer: article?.writer,
+        spotName: article?.spotName,
+        spotId: article?.spotId,
+        spotCategory: article?.spotCategory,
+      },
+      // revalidate: 3000,
+      // will be passed to the page component as props
+    };
+  } else {
+    return {
+      props: {
+        content: article?.content,
+        title: article?.title,
+        thumbnail: article?.thumbnail,
+        writerId: article?.writerId,
+        writer: article?.writer,
+      },
+      // revalidate: 3000,
+      // will be passed to the page component as props
+    };
+  }
 };
 
 // useEffect(() => {

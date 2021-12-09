@@ -62,32 +62,28 @@ const StampFile = () => {
   //   }
   // }, [user?.uid]);
   return (
-    <div className="w-full">
-      <div className="container">
-        <Dashboard>
-          <div className="mt-6">
-            <p className="font-bold text-lg">お寺</p>
-            <div className="mt-6 grid grid-cols-6 gap-4">
-              {stampData?.map((stamp) => (
-                <StampCard
-                  key={stamp.spotId}
-                  theme={stamp.visitedAt ? 'complete' : 'incomplete'}
-                >
-                  {stamp.spotName}
-                  <div>
-                    {stamp.visitedAt && (
-                      <span>
-                        観光した日: <Date timestamp={stamp.visitedAt} />
-                      </span>
-                    )}
-                  </div>
-                </StampCard>
-              ))}
-            </div>
-          </div>
-        </Dashboard>
+    <Dashboard>
+      <div className="mt-6">
+        <p className="font-bold text-lg">お寺</p>
+        <div className="mt-6 grid grid-cols-6 gap-4">
+          {stampData?.map((stamp) => (
+            <StampCard
+              key={stamp.spotId}
+              theme={stamp.visitedAt ? 'complete' : 'incomplete'}
+            >
+              {stamp.spotName}
+              <div>
+                {stamp.visitedAt && (
+                  <span>
+                    観光した日: <Date timestamp={stamp.visitedAt} />
+                  </span>
+                )}
+              </div>
+            </StampCard>
+          ))}
+        </div>
       </div>
-    </div>
+    </Dashboard>
   );
 };
 
