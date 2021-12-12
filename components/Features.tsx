@@ -9,13 +9,13 @@ import { format } from 'date-fns';
 
 const Features = () => {
   const [articles, setArticles] = useState<Article[]>();
+  const q = query(
+    collection(db, 'articles'),
+    limit(20),
+    orderBy('createdAt', 'desc')
+  );
 
   useEffect(() => {
-    const q = query(
-      collection(db, 'articles'),
-      limit(20),
-      orderBy('createdAt', 'desc')
-    );
     getDocs(q).then((snap) => {
       const items = snap.docs.map((doc) => doc.data() as Article);
       setArticles(items);

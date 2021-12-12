@@ -48,17 +48,6 @@ const Signup: FC = () => {
             email: email,
             createdAt: auth.currentUser.metadata.creationTime,
           });
-
-          // stripeIdを作成&Customersドキュメントに反映
-          const response = await fetch(
-            `http://localhost:3000/api/create-customer`
-          );
-          const customer = await response.json();
-          const customerDoc = await doc(db, 'customers', customer.customer.id);
-          await setDoc(customerDoc, {
-            uid: auth.currentUser.uid,
-            customerId: customer.customer.id,
-          });
         } catch (e) {
           console.error('Error adding document: ', e);
         }

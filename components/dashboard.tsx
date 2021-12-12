@@ -27,6 +27,10 @@ const Dashboard = ({ children }) => {
       name: 'チケット',
       href: '/dashboard/ticket',
     },
+    {
+      name: 'QRコード',
+      href: '/dashboard/qr-search',
+    },
   ];
   function classNames(...classes) {
     return classes.filter(Boolean).join(' ');

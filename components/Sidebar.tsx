@@ -108,7 +108,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="py-6">
+    <div className="py-6 z-20">
       {sideNavList.map((item) => (
         <div key={item.label}>
           <>
