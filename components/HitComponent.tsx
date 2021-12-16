@@ -27,14 +27,18 @@ interface HitComponentProps extends Props {
 
 function HitComponent({ hit }: HitComponentProps | null): JSX.Element {
   return (
-    <ArticleCard
-      thumbnail={hit?.thumbnail}
-      key={hit.id}
-      title={hit.title}
-      href={`/${hit.writer}/${hit.id}`}
-      user={hit.writerId}
-      date={hit.createdAt}
-    />
+    <div>
+      <div className="">
+        <ArticleCard
+          thumbnail={hit?.thumbnail}
+          key={hit.id}
+          title={hit.title}
+          href={`/${hit.writer}/${hit.id}`}
+          user={hit.writerId}
+          date={hit.createdAt}
+        />
+      </div>
+    </div>
   );
 }
 

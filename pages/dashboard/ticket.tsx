@@ -46,7 +46,7 @@ const Ticket = () => {
     const ref = collection(db, `customers/${user.uid}/checkout_sessions`);
     const docRef = await addDoc(ref, {
       mode: 'payment',
-      price: 'price_1K6WY1HTrQUbry08rEyxWVFR', // One-time price created in Stripe
+      price: 'price_1K7DPmHTrQUbry08MSm75BJF', // One-time price created in Stripe
       success_url: window.location.origin,
       cancel_url: window.location.origin,
       // tax_rates: ['txr_1K52OKHTrQUbry08uPI4UQUj'],

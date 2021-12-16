@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import style from '../styles/tiptap.module.scss';
 import Blockquote from '@tiptap/extension-blockquote';
 import Heading from '@tiptap/extension-heading';
 import Table from '@tiptap/extension-table';

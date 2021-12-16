@@ -12,6 +12,7 @@ import { limit, orderBy } from 'firebase/firestore';
 import { Article } from '../../types/article';
 import Date from '../../components/Date';
 import Link from 'next/link';
+import Breadcrumbs from '../../components/Breadcrumbs';
 
 const Management = () => {
   const router = useRouter();
@@ -52,6 +53,12 @@ const Management = () => {
   //     console.log(articleIds, 'articleId');
   //   }
   // }, [user?.uid]);
+
+  const PageHierarchy = {
+    name: '記事管理',
+    href: '/dashboard/articles',
+    current: true,
+  };
   return (
     <Dashboard>
       <div className="w-full text-right my-3">
