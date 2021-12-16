@@ -67,6 +67,7 @@ const Article = ({
   title: string | null;
   content: JSON | null;
 }) => {
+  console.log(content, 'content');
   const { user } = useAuth();
   const router = useRouter();
   const { userId, articleId } = router.query;
@@ -108,7 +109,7 @@ const Article = ({
         }
       });
     }
-    if (user?.uid && user?.id == 'article') {
+    if (user?.uid && user?.id === 'article') {
       const stampRef = collection(db, `users/${user.uid}/stamps`);
       const q = query(stampRef, where('spotName', '==', spotName));
       getDocs(q).then((snap) => {
@@ -211,27 +212,31 @@ const Article = ({
                 <p>質問する</p>
               </div>
             </a>
-            {go ? (
-              <button className="ml-12">
-                <div className="flex">
-                  <FlagIcon
-                    onClick={deleteStamp}
-                    className="h-6 w-6 mr-2 text-yellow-300"
-                  />
-                  <p>スタンプ</p>
-                </div>
-              </button>
-            ) : (
-              <button onClick={addStamp} className="ml-12">
-                <div className="flex">
-                  <FlagIcon
-                    className="h-6 w-6 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                  />
-                  <p>スタンプ</p>
-                </div>
-              </button>
+            {writer === 'article' && (
+              <>
+                {go ? (
+                  <button className="ml-12">
+                    <div className="flex">
+                      <FlagIcon
+                        onClick={deleteStamp}
+                        className="h-6 w-6 mr-2 text-yellow-300"
+                      />
+                      <p>スタンプ</p>
+                    </div>
+                  </button>
+                ) : (
+                  <button onClick={addStamp} className="ml-12">
+                    <div className="flex">
+                      <FlagIcon
+                        className="h-6 w-6 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                      />
+                      <p>スタンプ</p>
+                    </div>
+                  </button>
+                )}
+              </>
             )}
             <TwitterShareButton
               url={`http://localhost:3000/${userId}/${articleId}`}
@@ -299,12 +304,15 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 export const getStaticProps: GetStaticProps = async (context) => {
   const snap = await adminDB.doc(`articles/${context.params.articleId}`).get();
-  const article = snap.data();
-
-  if (article?.writer == 'article') {
+  const snapContent = await adminDB
+    .doc(`articles/${context.params.articleId}/content/content`)
+    .get();
+  const article = await snap.data();
+  const articleContent = await snapContent.data();
+  if (article?.writer === 'article') {
     return {
       props: {
-        content: article?.content,
+        content: articleContent,
         title: article?.title,
         thumbnail: article?.thumbnail,
         writerId: article?.writerId,
@@ -319,7 +327,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
   } else {
     return {
       props: {
-        content: article?.content,
+        content: articleContent,
         title: article?.title,
         thumbnail: article?.thumbnail,
         writerId: article?.writerId,

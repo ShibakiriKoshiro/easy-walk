@@ -5,15 +5,15 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { db } from '../libs/firebase';
 import Date from './Date';
+import ArticleType from '../types/article-type';
 
-type Props = {
-  title: string;
-  href: string;
-  user: string;
-  date: number;
-};
-
-const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
+const ArticleCard: React.VFC<ArticleType> = ({
+  title,
+  href,
+  user,
+  date,
+  thumbnail,
+}) => {
   const [writer, setWriter] = useState<any>();
 
   useEffect(() => {
@@ -32,7 +32,7 @@ const ArticleCard: React.VFC<Props> = ({ title, href, user, date }) => {
           <div className="shadow rounded-lg flex flex-col flex-1">
             <div className="h-40 relative">
               <Image
-                src="/images/village.png"
+                src={thumbnail}
                 alt="photo"
                 layout="fill"
                 objectFit="cover"

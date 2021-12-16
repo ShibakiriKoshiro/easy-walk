@@ -83,7 +83,7 @@ const Mypage = () => {
   // クロップ対象のファイルを管理
   const [targetFile, setTargetFile] = useState<Blob | null>();
 
-  // アップロードボタン
+  // アップロードボタン対象があるかないか
   const [uploadImage, SetUploadImage] = useState<boolean>(false);
 
   // クロップ対象の画像をセット
@@ -124,34 +124,38 @@ const Mypage = () => {
   };
 
   // プレビューされている内容をアップロード
-  const uploadAvatar = async (croppedImage) => {
-    // 保存先のRefを取得
-    const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+  const uploadAvatar = async () => {
+    if (uploadImage) {
+      console.log('uploadAvatar');
+      // 保存先のRefを取得
+      const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
 
-    // 画像アップロード
-    await uploadString(storageRef, croppedImage as string, 'data_url');
+      // 画像アップロード
+      await uploadString(storageRef, preview as string, 'data_url');
 
-    // アップロードした画像を表示するためのURLを取得
-    const avatarUrl = await getDownloadURL(storageRef);
+      // アップロードした画像を表示するためのURLを取得
+      const avatarUrl = await getDownloadURL(storageRef);
+      console.log(avatarUrl, 'avatarUrl');
 
-    // ユーザードキュメントに反映
-    const userDoc = doc(db, `users/${user.uid}`);
+      // ユーザードキュメントに反映
+      const userDoc = doc(db, `users/${user.uid}`);
 
-    setDoc(
-      userDoc,
-      {
-        avatarUrl,
-      },
-      {
-        merge: true,
-      }
-    ).then(() => {
-      SetUploadImage(false);
-      alert('保存完了');
-    });
+      setDoc(
+        userDoc,
+        {
+          avatarUrl,
+        },
+        {
+          merge: true,
+        }
+      ).then(() => {
+        SetUploadImage(false);
+        alert('保存完了');
+      });
+    }
   };
 
-  const upload = (data) => {
+  const upload = async (data) => {
     const name = data.userName;
     const description = data.description;
     const link = data.link;
@@ -264,8 +268,10 @@ const Mypage = () => {
                   //　全部走り終わるまでsetされない
                   // 要修正
                   setPreview(croppedImage);
-                  uploadAvatar(croppedImage);
 
+                  // アップロード対象
+                  SetUploadImage(true);
+                  // uploadAvatar(croppedImage);
                   // ダイヤログを閉じるためにクロップターゲットを空にする
                   setTargetFile(null);
                   SetUploadImage(true);
@@ -304,6 +310,7 @@ const Mypage = () => {
           <button
             className="block ml-auto mt-6 px-8 py-2 bg-blue-600 hover:bg-indigo-600 shadow rounded text-white font-bold"
             type="submit"
+            onClick={uploadAvatar}
           >
             更新
           </button>
@@ -338,19 +345,6 @@ const Mypage = () => {
       >
         退会する
       </button>
-      {/* <form onSubmit={handleSubmit(onSubmit)}>
-          <input
-            placeholder="ユーザー名"
-            className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-            {...register('userName', { required: true })}
-          />
-          <button
-            className="block ml-auto mt-6 px-8 py-2 bg-red-600 hover:bg-red-700 shadow rounded text-white font-bold"
-            type="submit"
-          >
-            退会
-          </button>
-        </form> */}
     </Dashboard>
   );
 };

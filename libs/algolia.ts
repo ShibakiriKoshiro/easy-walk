@@ -1,20 +1,6 @@
-import algoliasearch from 'algoliasearch';
+// /liteにすると検索機能のみインポート可能
+import algoliasearch from 'algoliasearch/lite';
+const client = algoliasearch('0KPGNQ6DNQ', '9fa2b2d5d3ab13b7e9bd2bffc74190e2');
 
-const client = algoliasearch('YourApplicationID', 'YourAdminAPIKey');
-const index = client.initIndex('your_index_name');
-
-const objects = [
-  {
-    objectID: 1,
-    name: 'Foo',
-  },
-];
-
-index
-  .saveObjects(objects)
-  .then(({ objectIDs }) => {
-    console.log(objectIDs);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+export const articleIndex = client.initIndex('articles');
+// export const articleIndexAsc = client.initIndex('');

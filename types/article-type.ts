@@ -3,6 +3,7 @@ type ArticleType = {
   href: string;
   user: string;
   date: number;
+  thumbnail: string;
 };
 
 export default ArticleType;

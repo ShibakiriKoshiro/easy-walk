@@ -1,13 +1,16 @@
 import { SearchIcon } from '@heroicons/react/solid';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { articleIndex } from '../libs/algolia';
 
 type Inputs = {
   searchWord: string;
 };
 
 const Search = () => {
+  const [word, setWord] = useState();
+  const [searchResult, setSearchResult] = useState<number>();
   const {
     register,
     handleSubmit,
@@ -16,16 +19,27 @@ const Search = () => {
   } = useForm<Inputs>();
   const onSubmit = (data) => console.log(data);
 
+  const search = (value: string) => {
+    articleIndex.search<any>(value).then((result) => {
+      console.log(result.hits, 'hit');
+      setSearchResult(result.nbHits);
+    });
+  };
+  const handleWord = (event) => {
+    console.log(event.target.value, '値');
+    search(event.target.value);
+  };
   return (
     <div className="container mt-16">
       <form
-        onSubmit={handleSubmit(onSubmit)}
+        // onSubmit={handleSubmit(onSubmit)}
         className="relative py-3 px-6 border-gray-300 border-4 rounded-full mx-auto w-full"
       >
         <input
           placeholder="ユーザー名"
           className="px-3 text-lg w-full outline-none"
           {...register('searchWord', { required: true })}
+          onChange={(event) => handleWord(event)}
         />
         <button className="right-6 absolute py-auto" type="submit">
           <SearchIcon className="h-8 w-8" />

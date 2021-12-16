@@ -3,7 +3,7 @@ import { BeakerIcon, CameraIcon } from '@heroicons/react/solid';
 import { JSONContent } from '@tiptap/react';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -16,18 +16,6 @@ import { useAuth } from '../../../libs/userContext';
 import styles from '../../../styles/Modal.module.css';
 import { Article } from '../../../types/article';
 
-type Inputs = {
-  title: string;
-  description: string;
-  category: string;
-  status: 'public' | 'private';
-  spot: string;
-  spotId: string | null;
-  spotName: string | null;
-  spotArticleId: string | null;
-  spotCategory: string | null;
-};
-
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
@@ -38,22 +26,24 @@ export default function Home() {
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<Inputs>();
-  const [content, setContent] = useState<JSON>();
+  } = useForm<Article>();
+  const [content, setContent] = useState();
 
   const upload = (data) => {
     const articleDoc = doc(db, `articles/${articleId}`);
+    const articleContentDoc = doc(db, `articles/${articleId}/content/content`);
+
     if (user.id == 'article') {
       const article: Article = {
         id: articleId as string,
-        isPublic: data.status,
+        isPublic: data.isPublic,
+        tag: tag,
         category: data.category,
         title: data.title,
         description: data.description,
         writerId: user.uid,
         writer: user.id,
         createdAt: Date.now(),
-        content,
         spotId: data?.spotId,
         spotName: data?.spotName,
         spotArticleId: `${articleId}`,
@@ -65,17 +55,18 @@ export default function Home() {
       }).then(() => {
         alert('保存完了');
       });
+      setDoc(articleContentDoc, content, { merge: true });
     } else {
       const article = {
         id: articleId as string,
-        isPublic: data.status,
+        isPublic: data.isPublic,
+        tag: tag,
         category: data.category,
         title: data.title,
         description: data.description,
         writerId: user.uid,
         writer: user.id,
         createdAt: Date.now(),
-        content,
       };
 
       setDoc(articleDoc, article, {
@@ -83,6 +74,7 @@ export default function Home() {
       }).then(() => {
         alert('保存完了');
       });
+      setDoc(articleContentDoc, content, { merge: true });
     }
     // // userドキュメントに反映
     // const userDoc = doc(db, `users/${user.uid}/articleIds`);
@@ -109,17 +101,21 @@ export default function Home() {
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
+  const [tag, setTag] = useState([]);
+  const handleTag = (event) => {
+    setTag(event.target.value.split(','));
+  };
   const [spotId, setSpotId] = useState('');
   const [spotName, setSpotName] = useState('');
   const [spotArticleId, setSpotArticleId] = useState('');
   const [spotCategory, setSpotCategory] = useState('');
 
   const categories = ['観光', '特産品', '体験'];
-  const [body, setBody] = useState();
-  const [status, setStatus] = useState();
+  const [body, setBody] = useState<any>();
+  const [isPublic, setIsPublic] = useState();
   const [category, setCategory] = useState();
-  const handleStatus = (event) => {
-    setStatus(event.target.value);
+  const handleIsPublic = (event) => {
+    setIsPublic(event.target.value);
   };
   const handleCategory = (event) => {
     setCategory(event.target.value);
@@ -146,29 +142,35 @@ export default function Home() {
       `articles/${articleId}`
     );
     console.log(articleId, 'articleId');
+    const defaultContentDoc = doc(
+      db,
+      // 本来はarticleIdが入ってから取得
+      `articles/${articleId}/content/content`
+    );
 
     getDoc(defaultDoc).then((result) => {
       const articleData = result.data();
       console.log(articleData, '記事データ');
       if (articleData) {
-        const defaultStatus = articleData.status;
+        const defaultIsPublic = articleData.isPublic;
+        const defaultTag = articleData?.tag;
         const defaultCategory = articleData.category;
         const defaultPhoto = articleData.thumbnail;
         const defaultTitle = articleData.title;
         const defaultDescription = articleData.description;
-        const defaultBody = articleData.content;
+
         const defaultSpotId = articleData.spotId;
         const defaultSpotName = articleData.spotName;
         const defaultSpotCategory = articleData.spotCategory;
 
-        if (defaultBody) {
-          setBody(defaultBody);
+        if (defaultTag) {
+          setTag(defaultTag);
         }
         if (defaultCategory) {
           setCategory(defaultCategory);
         }
-        if (defaultStatus) {
-          setStatus(defaultStatus);
+        if (defaultIsPublic) {
+          setIsPublic(defaultIsPublic);
         }
         if (defaultDescription) {
           setDescription(defaultDescription);
@@ -190,6 +192,13 @@ export default function Home() {
         }
       }
     });
+    getDoc(defaultContentDoc).then((result) => {
+      const articleContentData = result.data();
+      const defaultBody = articleContentData;
+      if (defaultBody) {
+        setBody(defaultBody);
+      }
+    });
     // 第二引数は、ロードする条件指定
     if (userId != user?.uid) {
       console.log('編集権限がありません。');
@@ -207,6 +216,8 @@ export default function Home() {
 
   // アップロードボタン
   const [uploadImage, SetUploadImage] = useState<boolean>(false);
+  const [uploadThumbnailImage, SetUploadThumbnailImage] =
+    useState<boolean>(false);
 
   // クロップ対象の画像をセット
   const setImageToCropper = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -246,43 +257,45 @@ export default function Home() {
   };
 
   // プレビューされている内容をアップロード
-  const uploadAvatar = async () => {
+  const uploadThumbnail = async () => {
     // 保存先のRefを取得
-    const storageRef = ref(
-      storage,
+    if (uploadThumbnailImage) {
+      const storageRef = ref(
+        storage,
+        // 本来はarticleIdを動的に取得
+        `articles/${articleId}/thumbnail.jpg`
+      );
+
+      // 画像アップロード
+      await uploadString(storageRef, preview as string, 'data_url');
+
+      // アップロードした画像を表示するためのURLを取得
+      const thumbnail = await getDownloadURL(storageRef);
+
+      // ユーザードキュメントに反映
       // 本来はarticleIdを動的に取得
-      `articles/${articleId}/thumbnail.jpg`
-    );
+      const photoDoc = doc(db, `articles/${articleId}`);
 
-    // 画像アップロード
-    await uploadString(storageRef, preview as string, 'data_url');
-
-    // アップロードした画像を表示するためのURLを取得
-    const thumbnail = await getDownloadURL(storageRef);
-
-    // ユーザードキュメントに反映
-    // 本来はarticleIdを動的に取得
-    const photoDoc = doc(db, `articles/${articleId}`);
-
-    setDoc(
-      photoDoc,
-      {
-        thumbnail,
-      },
-      {
-        merge: true,
-      }
-    ).then(() => {
-      SetUploadImage(false);
-      alert('保存完了');
-    });
+      setDoc(
+        photoDoc,
+        {
+          thumbnail,
+        },
+        {
+          merge: true,
+        }
+      ).then(() => {
+        SetUploadThumbnailImage(false);
+        alert('保存完了');
+      });
+    }
   };
 
   return (
     <>
       <Heading>
         <BeakerIcon className="h-6 w-6 mr-6" />
-        <p className="text-xl font-bold">見出しです！</p>
+        <p className="text-xl font-bold">見出しです!</p>
       </Heading>
       <div className="container pt-8 pb-16">
         <div>
@@ -299,12 +312,12 @@ export default function Home() {
                 name="country"
                 autoComplete="country"
                 className="text-lg font-bold ml-auto mt-1 block py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                {...register('status', { required: true })}
-                value={status}
-                onChange={(event) => handleStatus(event)}
+                {...register('isPublic', { required: true })}
+                value={isPublic}
+                onChange={(event) => handleIsPublic(event)}
               >
-                <option value="public">公開</option>
-                <option value="private">非公開</option>
+                <option value={'true'}>公開</option>
+                <option value={'false'}>非公開</option>
               </select>
               <div className="w-full mt-6">
                 <label
@@ -343,6 +356,14 @@ export default function Home() {
               {...register('description', { required: true })}
               onChange={(event) => handleDescription(event)}
               value={description}
+            />
+            <input
+              placeholder="タグ(カンマ区切り)"
+              className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
+              {...register('tag', { required: true })}
+              onChange={(event) => handleTag(event)}
+              type={'tag'}
+              value={tag}
             />
             <p className="text-right">{description.length} /120文字</p>
             {user?.id == 'article' && (
@@ -401,16 +422,6 @@ export default function Home() {
                     stroke="currentColor"
                   />
                 </label>
-                {uploadImage && (
-                  <div className="mt-10 ml-12">
-                    <button
-                      className="px-2 py-1 shadow-xl rounded bg-blue-700 text-white"
-                      onClick={uploadAvatar}
-                    >
-                      アップロード
-                    </button>
-                  </div>
-                )}
               </div>
               <Modal
                 isOpen={!!targetFile}
@@ -442,7 +453,7 @@ export default function Home() {
                       setPreview(croppedImage);
                       // ダイヤログを閉じるためにクロップターゲットを空にする
                       setTargetFile(null);
-                      SetUploadImage(true);
+                      SetUploadThumbnailImage(true);
                     }}
                   >
                     適用
@@ -465,6 +476,7 @@ export default function Home() {
               <button
                 className="mt-3 ml-auto block px-8 py-2 bg-blue-600 hover:bg-indigo-600 shadow rounded text-white font-bold"
                 type="submit"
+                onClick={uploadThumbnail}
               >
                 更新
               </button>

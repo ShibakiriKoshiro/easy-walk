@@ -32,6 +32,7 @@ const MyList = () => {
         <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-4">
           {article?.map((article) => (
             <ArticleCard
+              thumbnail={article?.thumbnail}
               key={article.id}
               title={article.title}
               href={`/${article.writer}/${article.id}`}

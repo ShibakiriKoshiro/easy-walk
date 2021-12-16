@@ -73,24 +73,22 @@ const Tiptap = ({
 
       // クロッパーをステートに保持させる
       setCropper(wrapper);
+      console.log(wrapper, 'wrapper');
     };
 
     // リーダーに画像ファイルを渡す
     reader.readAsDataURL(targetFile as Blob);
   };
   // プレビューされている内容をアップロード
-  const uploadAvatar = async () => {
+  const uploadAvatar = async (croppedImage) => {
     // 保存先のRefを取得
     const storageRef = ref(
       storage,
       // 実際はarticleIdを取得して動的に
       `articles/${articleId}/${Date.now()}`
     );
-    console.log(storageRef);
-    console.log(preview);
-    console.log(user);
     // 画像アップロード
-    await uploadString(storageRef, preview as string, 'data_url');
+    await uploadString(storageRef, croppedImage as string, 'data_url');
 
     // アップロードした画像を表示するためのURLを取得
     const photoUrl = await getDownloadURL(storageRef);
@@ -234,12 +232,6 @@ const Tiptap = ({
             L
           </button>
           <button
-            className="px-2 py-1 shadow-xl rounded bg-blue-700 text-white"
-            onClick={uploadAvatar}
-          >
-            アップロード
-          </button>
-          <button
             onClick={() =>
               editor
                 .chain()
@@ -340,11 +332,13 @@ const Tiptap = ({
 
                   // プレビューステートにセット
                   setPreview(croppedImage);
+                  //アップロード
+                  uploadAvatar(croppedImage);
                   // ダイヤログを閉じるためにクロップターゲットを空にする
                   setTargetFile(null);
                 }}
               >
-                KKK
+                アップロード
               </button>
             </div>
           </Modal>

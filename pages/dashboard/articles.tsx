@@ -65,9 +65,11 @@ const Management = () => {
       {article?.map((article) => (
         <div key={article.id} className="border-b border-blue-gray-300 pt-2">
           <div className="flex justify-between">
-            <span className="font-bold hover:underline text-xl">
-              {article.title}
-            </span>
+            <Link href={`/${article.writer}/${article.id}`}>
+              <a className="font-bold hover:underline text-xl">
+                {article.title}
+              </a>
+            </Link>
             <Link href={`/${article.writer}/${article.id}/edit`}>
               <a>
                 <PencilIcon className="h-6 w-6" />
