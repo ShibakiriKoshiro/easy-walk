@@ -4,6 +4,8 @@ import 'tailwindcss/tailwind.css';
 import Layout from '../components/Layout';
 import { AuthProvider } from '../libs/userContext';
 import NextNProgress from 'nextjs-progressbar';
+import ReactDOM from 'react-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
   return (
