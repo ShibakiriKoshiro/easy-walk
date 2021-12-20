@@ -50,7 +50,7 @@ const Sidebar = () => {
       ],
     },
     {
-      href: '/',
+      href: '/stamp',
       label: 'スタンプラリー',
       icon: (
         <PuzzleIcon className="h-6 w-6" fill="none" stroke="currentColor" />
@@ -108,7 +108,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="py-6">
+    <div className="py-6 z-20">
       {sideNavList.map((item) => (
         <div key={item.label}>
           <>

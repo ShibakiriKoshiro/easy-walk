@@ -1,8 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import React, { useEffect, useState } from 'react';
+import { useEditor, EditorContent, JSONContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import style from '../styles/tiptap.module.scss';
 import Blockquote from '@tiptap/extension-blockquote';
 import Heading from '@tiptap/extension-heading';
 import Table from '@tiptap/extension-table';
@@ -19,9 +18,20 @@ import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import Modal from 'react-modal';
 import styles from '../styles/Modal.module.css';
 import { CameraIcon } from '@heroicons/react/solid';
+import { useRouter } from 'next/router';
 
-const Tiptap = () => {
+const Tiptap = ({
+  editable = true,
+  content,
+  onChange,
+}: {
+  editable: boolean;
+  content: JSON;
+  onChange?: (data: JSONContent) => void;
+}) => {
   const { user } = useAuth();
+  const router = useRouter();
+  const { articleId } = router.query;
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
@@ -53,8 +63,8 @@ const Tiptap = () => {
 
       // クロッパーの初期化
       const wrapper = new Cropper(image, {
-        aspectRatio: 1 / 1,
-        cropBoxResizable: false,
+        aspectRatio: 16 / 9,
+        // cropBoxResizable: false,
         // cropBoxMovable: false,
         dragMode: 'move',
         viewMode: 3,
@@ -62,30 +72,28 @@ const Tiptap = () => {
 
       // クロッパーをステートに保持させる
       setCropper(wrapper);
+      console.log(wrapper, 'wrapper');
     };
 
     // リーダーに画像ファイルを渡す
     reader.readAsDataURL(targetFile as Blob);
   };
   // プレビューされている内容をアップロード
-  const uploadAvatar = async () => {
+  const uploadAvatar = async (croppedImage) => {
     // 保存先のRefを取得
     const storageRef = ref(
       storage,
       // 実際はarticleIdを取得して動的に
-      `articles/uzRi3G661FQ3UpL82I6e/img`
+      `articles/${articleId}/${Date.now()}`
     );
-    console.log(storageRef);
-    console.log(preview);
-    console.log(user);
     // 画像アップロード
-    await uploadString(storageRef, preview as string, 'data_url');
+    await uploadString(storageRef, croppedImage as string, 'data_url');
 
     // アップロードした画像を表示するためのURLを取得
     const photoUrl = await getDownloadURL(storageRef);
 
     // FireStoreArticleテーブルに反映
-    const userDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
+    const userDoc = doc(db, `articles/${articleId}/`);
 
     setDoc(
       userDoc,
@@ -110,13 +118,13 @@ const Tiptap = () => {
   };
 
   const articleUpload = () => {
-    const json = editor.getJSON();
-    console.log(json);
-    const articleDoc = doc(db, `articles/uzRi3G661FQ3UpL82I6e/`);
+    const body = editor.getJSON();
+    console.log(body);
+    const articleDoc = doc(db, `articles/${articleId}/`);
     setDoc(
       articleDoc,
       {
-        json,
+        body,
       },
       {
         merge: true,
@@ -149,7 +157,7 @@ const Tiptap = () => {
 
     return (
       <>
-        <div className="grid gap-1 sm:gap-3 grid-cols-8 sm:grid-cols-8">
+        <div className="flex items-center gap-3 border-b-2">
           <button
             onClick={() => editor.chain().focus().setParagraph().run()}
             className={editor.isActive('paragraph') ? 'is-active' : ''}
@@ -223,12 +231,6 @@ const Tiptap = () => {
             L
           </button>
           <button
-            className="px-2 py-1 shadow-xl rounded bg-blue-700 text-white"
-            onClick={uploadAvatar}
-          >
-            アップロード
-          </button>
-          <button
             onClick={() =>
               editor
                 .chain()
@@ -239,15 +241,15 @@ const Tiptap = () => {
           >
             Table
           </button>
-          <div className="mt-6 flex">
-            <label className="h-full mt-auto -ml-6 cursor-pointer">
+          <div className="flex">
+            <label className="h-full mt-auto cursor-pointer">
               <input
                 onChange={setImageToCropper}
                 type="file"
                 className="hidden"
               />
               <CameraIcon
-                className="h-10 w-10 mt-12"
+                className="h-10 w-10"
                 fill="none"
                 stroke="currentColor"
               />
@@ -273,68 +275,78 @@ const Tiptap = () => {
       TableCell,
       Image,
     ],
-    content: {
-      type: 'doc',
-      content: [
-        // …
-      ],
-    },
+    content,
     editorProps: {
+      editable: () => editable,
       attributes: {
         class:
           'prose prose-sm sm:prose lg:prose xl:prose-xl focus:outline-none m-2',
       },
     },
+    onUpdate: (e) => {
+      // .contentにすると、type:docを記載しておく必要がある。
+      if (onChange) {
+        onChange(e.editor.getJSON());
+      }
+    },
   });
+
+  useEffect(() => {
+    if (editor?.isActive && !editor.isDestroyed) {
+      editor.chain().focus().setContent(content).run();
+    }
+  }, [content, editor]);
 
   return (
     <>
-      <div>
-        <MenuBar editor={editor} />
-        <Modal
-          isOpen={!!targetFile}
-          onAfterOpen={initCropper}
-          onRequestClose={() => setTargetFile(null)}
-          ariaHideApp={false}
-          className={styles.modal}
-          overlayClassName={styles.overlay}
-        >
-          <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
+      {editable && (
+        <div className="">
+          <MenuBar editor={editor} />
+          <Modal
+            isOpen={!!targetFile}
+            onAfterOpen={initCropper}
+            onRequestClose={() => setTargetFile(null)}
+            ariaHideApp={false}
+            className={styles.modal}
+            overlayClassName={styles.overlay}
+          >
+            <h2 className="font-bold text-2xl mb-6">画像xxを切り取る</h2>
 
-          <div className="max-w-sm h-60 pb-4 border-b mb-4">
-            <img id="image" className="block w-full" alt="" />
-          </div>
+            <div className="max-w-sm h-60 pb-4 border-b mb-4">
+              <img id="image" className="block w-full" alt="" />
+            </div>
 
-          <div className="text-right w-full">
-            <button
-              className="px-4 py-3 shadow rounded bg-gray-700 text-white"
-              type="submit"
-              onClick={() => {
-                // プレビューステートにクロッピング結果を格納
-                const croppedImage = cropper
-                  ?.getCroppedCanvas({
-                    width: 256, // リサイズ
-                    height: 256, // リサイズ
-                  })
-                  .toDataURL('image/jpeg');
+            <div className="text-right w-full">
+              <button
+                className="px-4 py-3 shadow rounded bg-gray-700 text-white"
+                type="submit"
+                onClick={() => {
+                  // プレビューステートにクロッピング結果を格納
+                  const croppedImage = cropper
+                    ?.getCroppedCanvas({
+                      width: 960, // リサイズ
+                      height: 540, // リサイズ
+                    })
+                    .toDataURL('image/jpeg');
 
-                // プレビューステートにセット
-                setPreview(croppedImage);
-                // ダイヤログを閉じるためにクロップターゲットを空にする
-                setTargetFile(null);
-              }}
-            >
-              KKK
-            </button>
-          </div>
-        </Modal>
-
-        <EditorContent
-          className="border-2 rounded shadow p-1 w-full outline-none"
-          editor={editor}
-        />
-        <button onClick={articleUpload}>JSON</button>
+                  // プレビューステートにセット
+                  setPreview(croppedImage);
+                  //アップロード
+                  uploadAvatar(croppedImage);
+                  // ダイヤログを閉じるためにクロップターゲットを空にする
+                  setTargetFile(null);
+                }}
+              >
+                アップロード
+              </button>
+            </div>
+          </Modal>
+        </div>
+      )}
+      <div className={editable ? 'border' : ''}>
+        <EditorContent className="w-full" editor={editor} />
       </div>
+      {/* {editable && <button onClick={articleUpload}>JSON</button>} */}
     </>
   );
 };

@@ -1,48 +1,123 @@
-import { SearchIcon } from '@heroicons/react/solid';
-import Link from 'next/link';
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { hitComponent } from '../components/HitComponent';
+import { indexName, searchClient } from '../libs/searchClient';
+import { InstantSearch, Hits, Configure } from 'react-instantsearch-dom';
+import React, { useRef, useState, useEffect } from 'react';
+import { CustomPagination } from '../components/algolia/pagenation';
+import { CustomSearchBox } from '../components/algolia/searchbox';
+import { CustomHits } from '../components/algolia/hitResult';
+import qs from 'qs';
+import {
+  SearchBox,
+  RefinementList,
+  Pagination,
+  Highlight,
+} from 'react-instantsearch-dom';
+import algoliasearch from 'algoliasearch';
+import PropTypes from 'prop-types';
+import Router from 'next/router';
+import { useRouter } from 'next/router';
 
-type Inputs = {
-  searchWord: string;
+const DEBOUNCE_TIME = 400;
+
+const createURL = (state) => {
+  console.log(state, 'state');
+  const isDefaultRoute = !state.query && state.page === 1;
+  // state.refinementList &&
+  // state.refinementList.tag.length === 0 &&
+  // state.refinementList.category;
+
+  if (isDefaultRoute) {
+    return '';
+  }
+
+  // const categoryPath = state.category
+  //   ? `${getCategorySlug(state.category)}/`
+  //   : '';
+  const queryParameters: any = {};
+
+  if (state.query) {
+    queryParameters.query = encodeURIComponent(state.query);
+  }
+  if (state.page !== 1) {
+    queryParameters.page = state.page;
+  }
+  // if (state.refinementList.tag) {
+  //   queryParameters.tag = state.refinementList.tag.map(encodeURIComponent);
+  // }
+
+  const queryString = qs.stringify(queryParameters, {
+    addQueryPrefix: true,
+    arrayFormat: 'repeat',
+  });
+  console.log(queryString, 'queryString');
+
+  return `/search/${queryString}`;
+  // return `/search/${categoryPath}${queryString}`;
 };
 
-const Search = () => {
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<Inputs>();
-  const onSubmit = (data) => console.log(data);
+const searchStateToUrl = (searchState) =>
+  searchState ? createURL(searchState) : '';
+
+export default function Search() {
+  const router = useRouter();
+
+  const urlToSearchState = () => {
+    // const pathnameMatches = location.pathname.match(/search\/(.*?)\/?$/);
+    // const category = getCategoryName(
+    //   (pathnameMatches && pathnameMatches[1]) || ''
+    // );
+    const { query = '', page = 1, brands = [] } = qs.parse(router.query as any);
+    // `qs` does not return an array when there's a single value.
+    const allBrands = Array.isArray(brands) ? brands : [brands].filter(Boolean);
+
+    return {
+      query: decodeURIComponent(query as string),
+      page,
+      // menu: {
+      //   categories: decodeURIComponent(category),
+      // },
+      refinementList: {
+        brand: allBrands.map(decodeURIComponent),
+      },
+    };
+  };
+
+  const [searchState, setSearchState] = useState(urlToSearchState());
+  const debouncedSetStateRef = useRef(null);
+
+  function onSearchStateChange(updatedSearchState) {
+    clearTimeout(debouncedSetStateRef.current);
+
+    debouncedSetStateRef.current = setTimeout(() => {
+      router.push(searchStateToUrl(updatedSearchState), null, {
+        shallow: true,
+      });
+    }, DEBOUNCE_TIME);
+
+    setSearchState(updatedSearchState);
+  }
+
+  useEffect(() => {
+    if (router.isReady) {
+      setSearchState(urlToSearchState());
+    }
+  }, [router.isReady]);
 
   return (
-    <div className="container mt-16">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="relative py-3 px-6 border-gray-300 border-4 rounded-full mx-auto w-full"
+    <div className="container">
+      <InstantSearch
+        indexName={indexName}
+        searchClient={searchClient}
+        searchState={searchState}
+        onSearchStateChange={onSearchStateChange}
+        createURL={createURL}
       >
-        <input
-          placeholder="ユーザー名"
-          className="px-3 text-lg w-full outline-none"
-          {...register('searchWord', { required: true })}
-        />
-        <button className="right-6 absolute py-auto" type="submit">
-          <SearchIcon className="h-8 w-8" />
-        </button>
-      </form>
-      <div className="grid grid-cols-6 mt-6">
-        <Link href="#">
-          <a>
-            <div className="border-2 shadow border-gray-400 p-2 rounded-lg text-center hover:bg-indigo-200">
-              <SearchIcon className="h-8 w-8 mx-auto" />
-              <p className="pt-2">しまなみ海道</p>
-            </div>
-          </a>
-        </Link>
-      </div>
+        <Configure hitsPerPage={2} />
+        <CustomSearchBox />
+        {/* <Hits hitComponent={hitComponent} /> */}
+        <CustomHits />
+        <CustomPagination />
+      </InstantSearch>
     </div>
   );
-};
-
-export default Search;
+}

@@ -1,7 +1,7 @@
 import { BeakerIcon } from '@heroicons/react/solid';
 import React from 'react';
-import ArticleCard from '../components/ArticleCard';
-import Heading from '../components/Heading';
+import ArticleCard from '../../components/ArticleCard';
+import Heading from '../../components/Heading';
 
 const MyList = () => {
   return (
@@ -17,7 +17,7 @@ const MyList = () => {
               title="タイトル"
               href="/article/1"
               user="ユーザー名"
-              date="2021-10-10"
+              date={123456789}
             />
           </div>
         </div>
