@@ -139,7 +139,7 @@ export default function Home({
   const [spotCategory, setSpotCategory] = useState('');
 
   const categories = ['観光', '特産品', '体験'];
-  const [body, setBody] = useState<any>();
+  const [body, setBody] = useState<any>(defaultContent);
   const [isPublic, setIsPublic] = useState();
   const [category, setCategory] = useState();
   const handleIsPublic = (event) => {
@@ -234,7 +234,7 @@ export default function Home({
   //   }
   // }, [articleId, user?.uid]);
   // プレビュー画像を管理
-  const [preview, setPreview] = useState<string>();
+  const [preview, setPreview] = useState<string>(defaultThumbnail);
 
   // クロッパーを管理
   const [cropper, setCropper] = useState<Cropper | null>();

@@ -9,6 +9,9 @@ import { useAuth } from '../libs/userContext';
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { FacebookAuthProvider } from 'firebase/auth';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 type Inputs = {
   email: string;
@@ -112,20 +115,71 @@ const Signin: FC = () => {
       });
   };
 
-  const logOut = async () => {
-    signOut(auth)
-      .then(() => {
-        // Sign-out successful.
-        console.log('ログアウト');
+  // Facebookログイン
+  const facebookProvider = new FacebookAuthProvider();
+  const loginFacebook = () => {
+    signInWithPopup(auth, facebookProvider)
+      .then(async (result) => {
+        try {
+          // This gives you a Facebook Access Token. You can use it to access the Facebook API.
+          const credential = FacebookAuthProvider.credentialFromResult(result);
+          const accessToken = credential.accessToken;
+          const user = result.user;
+          const userDoc = doc(db, `users/${user.uid}`);
+          // ユーザードキュメントにユーザーidのみ反映
+          // おそらく反映するより前にコンテクストが走ってnullになっている
+          await getDoc(userDoc).then(async (result) => {
+            const userData = await result?.data();
+            console.log(userData, 'userData');
+            if (!userData) {
+              console.log('ドキュメント反映', user.uid);
+              await setDoc(doc(db, 'users', user.uid), {
+                uid: user.uid,
+              }).then(() => {
+                router.push('/register');
+              });
+              console.log('userにセットしたよ', user.uid);
+            }
+            if (userData?.uid && userData?.id && userData?.name) {
+              router.push('/');
+            }
+            if ((userData?.uid && !userData?.id) || !userData?.name) {
+              router.push('/register');
+            }
+          });
+          // console.log({ credential, token, user });
+        } catch {
+          console.log('error');
+        }
       })
       .catch((error) => {
-        // An error happened.
+        // Handle Errors here.
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // The email of the user's account used.
+        const email = error.email;
+        // The AuthCredential type that was used.
+        const credential = FacebookAuthProvider.credentialFromError(error);
+      });
+  };
+
+  //　パスワード忘れ
+  const auth = getAuth();
+  const changePass = () => {
+    sendPasswordResetEmail(auth, 'olive070719@gmail.com')
+      .then(() => {
+        // Password reset email sent!
+        // ..
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
       });
   };
 
   return (
     <div className="container w-full">
-      <button onClick={logOut}>ログアウト</button>
       <div className="w-full">
         <p className="text-center pt-8 font-bold text-lg">サインイン</p>
         <form onSubmit={handleSubmit(logIn)}>
@@ -154,17 +208,27 @@ const Signin: FC = () => {
       </div>
 
       <div className="w-full text-center grid gap-8 mx-auto max-w-md">
-        <button onClick={loginGoolgle}>Google</button>
         <p className="text-center pt-16 font-bold text-lg">
           SNSアカウントでログイン
         </p>
-        <Button theme="facebook">Facebook</Button>
-        <Button theme="google">Google</Button>
+        <button
+          onClick={loginGoolgle}
+          className="px-6 py-2 rounded-full inline-block bg-red-500 text-white font-bold"
+        >
+          Google
+        </button>
+        <button
+          onClick={loginFacebook}
+          className="px-6 py-2 rounded-full inline-block bg-blue-600 text-white font-bold"
+        >
+          Facebook
+        </button>
         <Button theme="twitter">Twitter</Button>
         <Link href="/signup">
           <a className="text-blue-600 font-bold">登録はこちら</a>
         </Link>
       </div>
+      <button onClick={changePass}>パス忘れた</button>
     </div>
   );
 };

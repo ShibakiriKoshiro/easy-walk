@@ -14,10 +14,11 @@ type Inputs = {
 const Register = () => {
   const { user } = useAuth();
   useEffect(() => {
-    if (user?.id && user?.name) {
+    if (!user?.uid) {
       router.push('/');
     }
   }, [user?.uid]);
+
   const auth = getAuth();
   const {
     register,

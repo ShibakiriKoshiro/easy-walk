@@ -20,19 +20,20 @@ export const AuthProvider = ({ children }) => {
     const unsubscribeAuthState = onAuthStateChanged(auth, async (fbUser) => {
       console.log('userContext');
       if (fbUser) {
-        console.log('fbuser', fbUser);
         unsubscribeUser?.();
         unsubscribeUser = onSnapshot(doc(db, `users/${fbUser.uid}`), (doc) => {
-          console.log(doc.data(), 'doc');
           // resultの値がおかしい
           const resultUser = doc.data();
-          console.log(resultUser);
+
           if (resultUser && !resultUser.name) {
             router.push('/register');
           }
           // セット出来ていない。
           setUser(doc.data() as User);
         });
+      }
+      if (!fbUser) {
+        setUser(null);
       }
 
       // ユーザーのidと名前がなければ登録ページへ
