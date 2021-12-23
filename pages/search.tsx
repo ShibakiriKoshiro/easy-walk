@@ -108,6 +108,7 @@ export default function Search() {
       <InstantSearch
         indexName={indexName}
         searchClient={searchClient}
+        stalledSearchDelay={500}
         searchState={searchState}
         onSearchStateChange={onSearchStateChange}
         createURL={createURL}

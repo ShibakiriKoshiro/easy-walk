@@ -237,6 +237,7 @@ const Layouts: FC = (props: { children: ReactNode }) => {
       .then(() => {
         // Sign-out successful.
         console.log('ログアウト');
+        document.location.reload();
       })
       .catch((error) => {
         // An error happened.

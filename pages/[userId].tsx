@@ -45,7 +45,7 @@ const About = () => {
   }, [userId]);
 
   return (
-    <div className="container mt-16">
+    <div className="container mt-16 py-16">
       <div className="flex items-center">
         <img src={avatarUrl} alt="photo" className="rounded-full w-32 h-32" />
         <div className="ml-6">

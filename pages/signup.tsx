@@ -38,10 +38,10 @@ const Signup: FC = () => {
     const password = data.password;
     e.preventDefault();
     createUserWithEmailAndPassword(auth, email, password)
-      .then(async (userCredential) => {
+      .then(async () => {
         try {
           //　ユーザードキュメントに反映
-          const docRef = await setDoc(doc(db, 'users', auth.currentUser.uid), {
+          await setDoc(doc(db, 'users', auth.currentUser.uid), {
             uid: auth.currentUser.uid,
             id: data.id,
             name: data.name,
@@ -52,9 +52,10 @@ const Signup: FC = () => {
           console.error('Error adding document: ', e);
         }
 
-        // Signed in
-        const user = userCredential.user;
+        // // Signed in
+        // const user = userCredential.user;
         // ...
+
         router.push('/signin');
       })
       .catch((err) => {
@@ -69,7 +70,7 @@ const Signup: FC = () => {
         <p className="text-center pt-8 font-bold text-lg">サインアップ</p>
         <form onSubmit={handleSubmit(createUser)}>
           <input
-            placeholder="ユーザーID　※半角英字のみ"
+            placeholder="ユーザーID ※半角英字のみ"
             className="block mx-auto p-1 mt-6 border-gray-300 border-2 rounded w-1/2"
             defaultValue=""
             {...register('id')}
