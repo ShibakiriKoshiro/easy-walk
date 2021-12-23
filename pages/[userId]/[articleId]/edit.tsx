@@ -5,6 +5,7 @@ import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { collection, doc, getDoc, setDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
+import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -12,22 +13,49 @@ import Modal from 'react-modal';
 import Heading from '../../../components/Heading';
 import Tiptap from '../../../components/Tiptap';
 import { db, storage } from '../../../libs/firebase';
+import { adminDB } from '../../../libs/firebase-admin';
 import { useAuth } from '../../../libs/userContext';
 import styles from '../../../styles/Modal.module.css';
 import { Article } from '../../../types/article';
 
-export default function Home() {
+export default function Home({
+  defaultContent,
+  defaultTitle,
+  defaultThumbnail,
+  defaultWriterId,
+  defaultWriter,
+  defaultSpotName,
+  defaultSpotId,
+  defaultSpotCategory,
+  defaultIsPublic,
+  defaultTag,
+  defaultCategory,
+  defaultDescription,
+}: {
+  defaultSpotCategory: string | null;
+  defaultSpotId: string | null;
+  defaultSpotName: string | null;
+  defaultWriter: string | null;
+  defaultWriterId: string | null;
+  defaultThumbnail: string | null;
+  defaultTitle: string | null;
+  defaultContent: JSON | null;
+  defaultIsPublic: boolean | null;
+  defaultTag: Array<string> | null;
+  defaultCategory: string | null;
+  defaultDescription: string | null;
+}) {
   const router = useRouter();
   const { user } = useAuth();
   const { userId, articleId } = router.query;
-
+  // 記事とユーザーが取れてからif文でガードする。ユーザーと著者が一致していればローディングtrue
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
   } = useForm<Article>();
-  const [content, setContent] = useState();
+  const [content, setContent] = useState(defaultContent);
 
   const upload = (data) => {
     const articleDoc = doc(db, `articles/${articleId}`);
@@ -92,20 +120,20 @@ export default function Home() {
     // });
   };
 
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(defaultTitle);
   const handleTitle = (event) => {
     console.log(title);
     setTitle(event.target.value);
   };
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(defaultDescription);
   const handleDescription = (event) => {
     setDescription(event.target.value);
   };
-  const [tag, setTag] = useState([]);
+  const [tag, setTag] = useState(defaultTag);
   const handleTag = (event) => {
     setTag(event.target.value.split(','));
   };
-  const [spotId, setSpotId] = useState('');
+  const [spotId, setSpotId] = useState(defaultSpotId);
   const [spotName, setSpotName] = useState('');
   const [spotArticleId, setSpotArticleId] = useState('');
   const [spotCategory, setSpotCategory] = useState('');
@@ -131,80 +159,80 @@ export default function Home() {
   };
 
   //　記事idを取得後記事の中身をセット
-  useEffect(() => {
-    if (!articleId) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!articleId) {
+  //     return;
+  //   }
 
-    const defaultDoc = doc(
-      db,
-      // 本来はarticleIdが入ってから取得
-      `articles/${articleId}`
-    );
-    console.log(articleId, 'articleId');
-    const defaultContentDoc = doc(
-      db,
-      // 本来はarticleIdが入ってから取得
-      `articles/${articleId}/content/content`
-    );
+  //   const defaultDoc = doc(
+  //     db,
+  //     // 本来はarticleIdが入ってから取得
+  //     `articles/${articleId}`
+  //   );
+  //   console.log(articleId, 'articleId');
+  //   const defaultContentDoc = doc(
+  //     db,
+  //     // 本来はarticleIdが入ってから取得
+  //     `articles/${articleId}/content/content`
+  //   );
 
-    getDoc(defaultDoc).then((result) => {
-      const articleData = result.data();
-      console.log(articleData, '記事データ');
-      if (articleData) {
-        const defaultIsPublic = articleData.isPublic;
-        const defaultTag = articleData?.tag;
-        const defaultCategory = articleData.category;
-        const defaultPhoto = articleData.thumbnail;
-        const defaultTitle = articleData.title;
-        const defaultDescription = articleData.description;
+  //   getDoc(defaultDoc).then((result) => {
+  //     const articleData = result.data();
+  //     console.log(articleData, '記事データ');
+  //     if (articleData) {
+  //       const defaultIsPublic = articleData.isPublic;
+  //       const defaultTag = articleData?.tag;
+  //       const defaultCategory = articleData.category;
+  //       const defaultPhoto = articleData.thumbnail;
+  //       const defaultTitle = articleData.title;
+  //       const defaultDescription = articleData.description;
 
-        const defaultSpotId = articleData.spotId;
-        const defaultSpotName = articleData.spotName;
-        const defaultSpotCategory = articleData.spotCategory;
+  //       const defaultSpotId = articleData.spotId;
+  //       const defaultSpotName = articleData.spotName;
+  //       const defaultSpotCategory = articleData.spotCategory;
 
-        if (defaultTag) {
-          setTag(defaultTag);
-        }
-        if (defaultCategory) {
-          setCategory(defaultCategory);
-        }
-        if (defaultIsPublic) {
-          setIsPublic(defaultIsPublic);
-        }
-        if (defaultDescription) {
-          setDescription(defaultDescription);
-        }
-        if (defaultTitle) {
-          setTitle(defaultTitle);
-        }
-        if (defaultPhoto) {
-          setPreview(defaultPhoto);
-        }
-        if (defaultSpotId) {
-          setSpotId(defaultSpotId);
-        }
-        if (defaultSpotName) {
-          setSpotName(defaultSpotName);
-        }
-        if (defaultSpotCategory) {
-          setSpotCategory(defaultSpotCategory);
-        }
-      }
-    });
-    getDoc(defaultContentDoc).then((result) => {
-      const articleContentData = result.data();
-      const defaultBody = articleContentData;
-      if (defaultBody) {
-        setBody(defaultBody);
-      }
-    });
-    // 第二引数は、ロードする条件指定
-    if (userId != user?.uid) {
-      console.log('編集権限がありません。');
-      // router.push('/');
-    }
-  }, [articleId, user?.uid]);
+  //       if (defaultTag) {
+  //         setTag(defaultTag);
+  //       }
+  //       if (defaultCategory) {
+  //         setCategory(defaultCategory);
+  //       }
+  //       if (defaultIsPublic) {
+  //         setIsPublic(defaultIsPublic);
+  //       }
+  //       if (defaultDescription) {
+  //         setDescription(defaultDescription);
+  //       }
+  //       if (defaultTitle) {
+  //         setTitle(defaultTitle);
+  //       }
+  //       if (defaultPhoto) {
+  //         setPreview(defaultPhoto);
+  //       }
+  //       if (defaultSpotId) {
+  //         setSpotId(defaultSpotId);
+  //       }
+  //       if (defaultSpotName) {
+  //         setSpotName(defaultSpotName);
+  //       }
+  //       if (defaultSpotCategory) {
+  //         setSpotCategory(defaultSpotCategory);
+  //       }
+  //     }
+  //   });
+  //   getDoc(defaultContentDoc).then((result) => {
+  //     const articleContentData = result.data();
+  //     const defaultBody = articleContentData;
+  //     if (defaultBody) {
+  //       setBody(defaultBody);
+  //     }
+  //   });
+  //   // 第二引数は、ロードする条件指定
+  //   if (userId != user?.uid) {
+  //     console.log('編集権限がありません。');
+  //     // router.push('/');
+  //   }
+  // }, [articleId, user?.uid]);
   // プレビュー画像を管理
   const [preview, setPreview] = useState<string>();
 
@@ -487,3 +515,52 @@ export default function Home() {
     </>
   );
 }
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  return { paths: [], fallback: 'blocking' };
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const snap = await adminDB.doc(`articles/${context.params.articleId}`).get();
+  const snapContent = await adminDB
+    .doc(`articles/${context.params.articleId}/content/content`)
+    .get();
+  const article = await snap.data();
+  const articleContent = await snapContent.data();
+  if (article?.writer === 'article') {
+    return {
+      props: {
+        defaultContent: articleContent,
+        defaultTitle: article?.title,
+        defaultThumbnail: article?.thumbnail,
+        defaultWriterId: article?.writerId,
+        defaultWriter: article?.writer,
+        defaultSpotName: article?.spotName,
+        defaultSpotId: article?.spotId,
+        defaultSpotCategory: article?.spotCategory,
+        defaultIsPublic: article?.isPublic,
+        defaultTag: article?.tag,
+        defaultCategory: article?.category,
+        defaultDescription: article?.description,
+      },
+      // revalidate: 3000,
+      // will be passed to the page component as props
+    };
+  } else {
+    return {
+      props: {
+        defaultContent: articleContent,
+        defaultTitle: article?.title,
+        defaultThumbnail: article?.thumbnail,
+        defaultWriterId: article?.writerId,
+        defaultWriter: article?.writer,
+        defaultIsPublic: article?.isPublic,
+        defaultTag: article?.tag,
+        defaultCategory: article?.category,
+        defaultDescription: article?.description,
+      },
+      // revalidate: 3000,
+      // will be passed to the page component as props
+    };
+  }
+};

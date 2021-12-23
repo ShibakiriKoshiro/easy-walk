@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from '@firebase/auth';
-import { doc, getDoc } from '@firebase/firestore';
+import { doc, getDoc, onSnapshot } from '@firebase/firestore';
+import router from 'next/router';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types/User';
 import { auth, db } from './firebase';
@@ -14,15 +15,42 @@ const AuthContext = createContext<{
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
+    let unsubscribeUser;
     // ログインユーザー監視
-    const watch = onAuthStateChanged(auth, async (user) => {
-      const querySnapshot = await getDoc(doc(db, `users/${user?.uid}`));
-      const fbUser = querySnapshot.data() as User;
-      setUser(fbUser);
+    const unsubscribeAuthState = onAuthStateChanged(auth, async (fbUser) => {
+      console.log('userContext');
+      if (fbUser) {
+        console.log('fbuser', fbUser);
+        unsubscribeUser?.();
+        unsubscribeUser = onSnapshot(doc(db, `users/${fbUser.uid}`), (doc) => {
+          console.log(doc.data(), 'doc');
+          // resultの値がおかしい
+          const resultUser = doc.data();
+          console.log(resultUser);
+          if (resultUser && !resultUser.name) {
+            router.push('/register');
+          }
+          // セット出来ていない。
+          setUser(doc.data() as User);
+        });
+      }
+
+      // ユーザーのidと名前がなければ登録ページへ
+      // const userDoc = await doc(db, `users/${user?.uid}`);
+      // await getDoc(userDoc).then(async (result) => {
+      //   const userData = await result.data();
+      //   if (user) {
+      //     if (userData?.id && userData?.uid) {
+      //     } else {
+      //       router.push('/register');
+      //     }
+      //   }
+      // });
     });
 
     return () => {
-      watch();
+      unsubscribeAuthState();
+      unsubscribeUser?.();
     };
   }, []);
 
