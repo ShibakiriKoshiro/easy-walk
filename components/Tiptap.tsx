@@ -26,7 +26,7 @@ const Tiptap = ({
   onChange,
 }: {
   editable: boolean;
-  content: JSON;
+  content: JSON | null;
   onChange?: (data: JSONContent) => void;
 }) => {
   const { user } = useAuth();

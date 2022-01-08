@@ -212,7 +212,7 @@ const Article = ({
                 <p>質問する</p>
               </div>
             </a>
-            {writer === 'article' && (
+            {spotId && (
               <>
                 {go ? (
                   <button className="ml-12">

@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from '@firebase/auth';
 import { doc, getDoc, onSnapshot } from '@firebase/firestore';
+import { sendEmailVerification } from 'firebase/auth';
 import router from 'next/router';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '../types/User';
@@ -18,7 +19,11 @@ export const AuthProvider = ({ children }) => {
     let unsubscribeUser;
     // ログインユーザー監視
     const unsubscribeAuthState = onAuthStateChanged(auth, async (fbUser) => {
-      console.log('userContext');
+      //メール認証
+      if (auth.currentUser && !auth.currentUser.emailVerified) {
+        router.push('/check-email');
+      }
+
       if (fbUser) {
         unsubscribeUser?.();
         unsubscribeUser = onSnapshot(doc(db, `users/${fbUser.uid}`), (doc) => {

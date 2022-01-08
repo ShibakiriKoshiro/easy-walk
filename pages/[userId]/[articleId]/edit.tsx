@@ -55,7 +55,6 @@ export default function Home({
     watch,
     formState: { errors },
   } = useForm<Article>();
-  const [content, setContent] = useState(defaultContent);
 
   const upload = (data) => {
     const articleDoc = doc(db, `articles/${articleId}`);
@@ -140,6 +139,7 @@ export default function Home({
 
   const categories = ['観光', '特産品', '体験'];
   const [body, setBody] = useState<any>(defaultContent);
+  const [content, setContent] = useState(defaultContent);
   const [isPublic, setIsPublic] = useState();
   const [category, setCategory] = useState();
   const handleIsPublic = (event) => {
@@ -377,7 +377,7 @@ export default function Home({
               type={'text'}
               value={title}
             />
-            <p className="text-right">{title.length} /32文字</p>
+            <p className="text-right">{title?.length} /32文字</p>
             <textarea
               placeholder="ディスクリプション"
               className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
@@ -393,13 +393,13 @@ export default function Home({
               type={'tag'}
               value={tag}
             />
-            <p className="text-right">{description.length} /120文字</p>
+            <p className="text-right">{description?.length} /120文字</p>
             {user?.id == 'article' && (
               <>
                 <input
                   placeholder="スポットID"
                   className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-                  {...register('spotId', { required: true })}
+                  {...register('spotId')}
                   onChange={(event) => handleSpotId(event)}
                   type={'text'}
                   value={spotId}
@@ -407,7 +407,7 @@ export default function Home({
                 <input
                   placeholder="スポット名"
                   className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-                  {...register('spotName', { required: true })}
+                  {...register('spotName')}
                   onChange={(event) => handleSpotName(event)}
                   type={'text'}
                   value={spotName}
@@ -415,7 +415,7 @@ export default function Home({
                 <input
                   placeholder="スポットカテゴリ"
                   className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"
-                  {...register('spotCategory', { required: true })}
+                  {...register('spotCategory')}
                   onChange={(event) => handleSpotCategory(event)}
                   type={'text'}
                   value={spotCategory}
@@ -526,41 +526,47 @@ export const getStaticProps: GetStaticProps = async (context) => {
     .doc(`articles/${context.params.articleId}/content/content`)
     .get();
   const article = await snap.data();
-  const articleContent = await snapContent.data();
-  if (article?.writer === 'article') {
-    return {
-      props: {
-        defaultContent: articleContent,
-        defaultTitle: article?.title,
-        defaultThumbnail: article?.thumbnail,
-        defaultWriterId: article?.writerId,
-        defaultWriter: article?.writer,
-        defaultSpotName: article?.spotName,
-        defaultSpotId: article?.spotId,
-        defaultSpotCategory: article?.spotCategory,
-        defaultIsPublic: article?.isPublic,
-        defaultTag: article?.tag,
-        defaultCategory: article?.category,
-        defaultDescription: article?.description,
-      },
-      // revalidate: 3000,
-      // will be passed to the page component as props
-    };
+  const articleContent = await snapContent?.data();
+  if (article?.id) {
+    if (article?.writer === 'article') {
+      return {
+        props: {
+          defaultContent: articleContent,
+          defaultTitle: article?.title,
+          defaultThumbnail: article?.thumbnail,
+          defaultWriterId: article?.writerId,
+          defaultWriter: article?.writer,
+          defaultSpotName: article?.spotName,
+          defaultSpotId: article?.spotId,
+          defaultSpotCategory: article?.spotCategory,
+          defaultIsPublic: article?.isPublic,
+          defaultTag: article?.tag,
+          defaultCategory: article?.category,
+          defaultDescription: article?.description,
+        },
+        // revalidate: 3000,
+        // will be passed to the page component as props
+      };
+    } else {
+      return {
+        props: {
+          defaultContent: articleContent,
+          defaultTitle: article?.title,
+          defaultThumbnail: article?.thumbnail,
+          defaultWriterId: article?.writerId,
+          defaultWriter: article?.writer,
+          defaultIsPublic: article?.isPublic,
+          defaultTag: article?.tag,
+          defaultCategory: article?.category,
+          defaultDescription: article?.description,
+        },
+        // revalidate: 3000,
+        // will be passed to the page component as props
+      };
+    }
   } else {
     return {
-      props: {
-        defaultContent: articleContent,
-        defaultTitle: article?.title,
-        defaultThumbnail: article?.thumbnail,
-        defaultWriterId: article?.writerId,
-        defaultWriter: article?.writer,
-        defaultIsPublic: article?.isPublic,
-        defaultTag: article?.tag,
-        defaultCategory: article?.category,
-        defaultDescription: article?.description,
-      },
-      // revalidate: 3000,
-      // will be passed to the page component as props
+      props: {},
     };
   }
 };

@@ -126,7 +126,6 @@ const Mypage = () => {
   // プレビューされている内容をアップロード
   const uploadAvatar = async () => {
     if (uploadImage) {
-      console.log('uploadAvatar');
       // 保存先のRefを取得
       const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
 
@@ -281,6 +280,9 @@ const Mypage = () => {
               </button>
             </div>
           </Modal>
+          <p className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-non">
+            <span>{auth.currentUser?.email}</span>
+          </p>
           <input
             placeholder="ユーザー名"
             className="block p-1 mt-6 border-gray-300 border-b-2 w-full outline-none"

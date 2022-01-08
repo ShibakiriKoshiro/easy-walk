@@ -1,4 +1,8 @@
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import {
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { FC, useEffect } from 'react';
@@ -163,7 +167,7 @@ const Signin: FC = () => {
       });
   };
 
-  //　パスワード忘れ
+  //　パスワード忘れ(本来は別ページで！)
   const auth = getAuth();
   const changePass = () => {
     sendPasswordResetEmail(auth, 'olive070719@gmail.com')
@@ -176,6 +180,17 @@ const Signin: FC = () => {
         const errorMessage = error.message;
         // ..
       });
+  };
+
+  //メール認証
+  //本来はサイト全体で行う。context
+  const checkEmail = () => {
+    if (!auth.currentUser.emailVerified) {
+      sendEmailVerification(auth.currentUser).then(() => {
+        // Email verification sent!
+        // ...
+      });
+    }
   };
 
   return (
@@ -229,6 +244,8 @@ const Signin: FC = () => {
         </Link>
       </div>
       <button onClick={changePass}>パス忘れた</button>
+      <div></div>
+      <button onClick={checkEmail}>メール認証する</button>
     </div>
   );
 };
